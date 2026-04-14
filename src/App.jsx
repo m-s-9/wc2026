@@ -271,7 +271,9 @@ function runSim(stats){
 function mkStats(){const s={};TEAMS.forEach(t=>{s[t.name]={w:0,fn:0,sf:0,qf:0,r16:0,r32:0};});return s;}
 
 // ── CLAUDE API ──────────────────────────────────────────────────────────────────
-const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
+const ANTHROPIC_KEY = (typeof import !== "undefined" && typeof import.meta !== "undefined" && import.meta.env)
+  ? (import.meta.env.VITE_ANTHROPIC_API_KEY || "") : "";
+
 async function callClaude(userPrompt,systemPrompt="",useSearch=false){
   if(!ANTHROPIC_KEY) throw new Error("API key missing — add VITE_ANTHROPIC_API_KEY to your .env file");
   const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:userPrompt}]};
@@ -638,345 +640,37 @@ function SimulatorSection(){
   );
 }
 
+function ComingSoon({title, icon, desc}){
+  return(
+    <div style={{maxWidth:600,margin:"80px auto",padding:"0 16px",textAlign:"center"}}>
+      <div style={{fontSize:48,marginBottom:24,opacity:0.4}}>{icon}</div>
+      <div style={{fontSize:11,fontFamily:"'Space Mono',monospace",color:"#00e676",letterSpacing:3,marginBottom:12,textTransform:"uppercase"}}>Coming Soon</div>
+      <h2 style={{fontSize:32,fontWeight:800,letterSpacing:1,marginBottom:16}}>{title}</h2>
+      <p style={{color:"#666",fontSize:15,lineHeight:1.7,marginBottom:32}}>{desc}</p>
+      <div style={{display:"inline-block",padding:"10px 24px",border:"1px solid rgba(255,255,255,0.1)",borderRadius:6,color:"#555",fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:1}}>
+        Powered by Claude AI · Launching soon
+      </div>
+    </div>
+  );
+}
+
 // ── PREDICTOR SECTION ──────────────────────────────────────────────────────────
 function PredictorSection(){
-  const [t1,setT1]=useState(TEAMS[0]);
-  const [t2,setT2]=useState(TEAMS[3]);
-  const [result,setResult]=useState(null);
-  const [loading,setLoading]=useState(false);
-
-  const winProb=useCallback((a,b)=>{
-    const p=eloWin(a,b);
-    const pW=(1-0.28)*p,pD=0.28,pL=1-pW-pD;
-    return {win:+(pW*100).toFixed(1),draw:+(pD*100).toFixed(1),lose:+(pL*100).toFixed(1)};
-  },[]);
-
-  const predict=async()=>{
-    setLoading(true);setResult(null);
-    try{
-      const p=winProb(t1,t2);
-      const resp=await callClaude(
-        `Analyse a FIFA World Cup 2026 knockout match between ${t1.name} (Elo ${t1.elo}) and ${t2.name} (Elo ${t2.elo}).
-
-Statistical win probabilities: ${t1.name} ${p.win}% | Draw ${p.draw}% | ${t2.name} ${p.lose}%
-
-Provide a sharp, IB-analyst style breakdown in 4 short sections:
-1. TACTICAL MATCHUP (2-3 sentences on how the styles clash)
-2. KEY BATTLES (3 individual matchups that will decide the game)  
-3. PREDICTION (who wins, score, key turning point)
-4. WILD CARD (one unexpected factor that could flip the outcome)
-
-Be specific, confident, and concise. No fluff.`,
-        "You are a world-class football analyst. Be specific and data-driven. Keep each section tight — max 3 sentences."
-      );
-      setResult({text:resp,probs:p});
-    }catch(e){setResult({error:e.message});}
-    setLoading(false);
-  };
-
-  const p=winProb(t1,t2);
-
-  return(
-    <div style={{maxWidth:900,margin:"0 auto",padding:"24px 16px 80px"}}>
-      <div style={{...S.label,marginBottom:20}}>AI-powered head-to-head match analysis</div>
-
-      {/* Team selectors */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:16,alignItems:"center",marginBottom:24}}>
-        <TeamPicker teams={TEAMS} selected={t1} onSelect={setT1} exclude={t2.name} />
-        <div style={{textAlign:"center",color:"#555",fontWeight:800,fontSize:20,fontFamily:"'Barlow Condensed',sans-serif"}}>VS</div>
-        <TeamPicker teams={TEAMS} selected={t2} onSelect={setT2} exclude={t1.name} />
-      </div>
-
-      {/* Probability bars */}
-      <div style={{...S.card,marginBottom:16}}>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 80px 1fr",gap:8,alignItems:"center",marginBottom:12}}>
-          <div>
-            <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>{t1.flag} {t1.name}</div>
-            <div style={{...S.mono,fontSize:22,fontWeight:700,color:ACCENT}}>{p.win}%</div>
-          </div>
-          <div style={{textAlign:"center"}}>
-            <div style={{...S.mono,fontSize:10,color:"#555",marginBottom:4}}>DRAW</div>
-            <div style={{...S.mono,fontSize:16,color:"#888"}}>{p.draw}%</div>
-          </div>
-          <div style={{textAlign:"right"}}>
-            <div style={{fontSize:13,fontWeight:700,marginBottom:4}}>{t2.flag} {t2.name}</div>
-            <div style={{...S.mono,fontSize:22,fontWeight:700,color:"#4A90E2"}}>{p.lose}%</div>
-          </div>
-        </div>
-        <div style={{height:8,borderRadius:4,overflow:"hidden",display:"flex"}}>
-          <div style={{width:`${p.win}%`,background:ACCENT}} />
-          <div style={{width:`${p.draw}%`,background:"#888"}} />
-          <div style={{flex:1,background:"#4A90E2"}} />
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:12}}>
-          {[["Elo Rating",t1.elo,t2.elo],["Confederation",t1.conf,t2.conf]].map(([label,v1,v2])=>(
-            <div key={label} style={{background:"rgba(255,255,255,0.03)",borderRadius:6,padding:"8px 12px"}}>
-              <div style={{...S.label,marginBottom:4}}>{label}</div>
-              <div style={{fontSize:13,display:"flex",justifyContent:"space-between"}}>
-                <span style={{color:CC[t1.conf]||"#ccc"}}>{v1}</span>
-                <span style={{color:CC[t2.conf]||"#ccc"}}>{v2}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <button onClick={predict} disabled={loading} style={{width:"100%",padding:"14px 24px",border:`1px solid ${ACCENT}`,borderRadius:8,background:loading?ACCENT+"11":ACCENT+"22",color:loading?"#555":ACCENT,fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:700,letterSpacing:1,transition:"all .2s",marginBottom:20}}>
-        {loading?"⟳  Analysing…":"⚡  Generate AI Analysis"}
-      </button>
-
-      {result&&(
-        <div style={{...S.card,borderColor:ACCENT+"33"}}>
-          {result.error?<div style={{color:"#e57373",...S.mono,fontSize:12}}>{result.error}</div>:(
-            <div style={{fontSize:14,lineHeight:1.8,color:"#ccc",whiteSpace:"pre-wrap"}}>{result.text}</div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  return <ComingSoon title="AI Match Predictor" icon="⚡" desc="Pick any two teams and get a full tactical breakdown — win probabilities, key battles, score prediction, and wild card factors. Powered by Claude AI with real-time data." />;
 }
 
-function TeamPicker({teams,selected,onSelect,exclude}){
-  const [open,setOpen]=useState(false);
-  const [q,setQ]=useState("");
-  const filtered=teams.filter(t=>t.name!==exclude&&t.name.toLowerCase().includes(q.toLowerCase()));
-  return(
-    <div style={{position:"relative"}}>
-      <div onClick={()=>setOpen(!open)} style={{...S.card,cursor:"pointer",textAlign:"center",padding:"16px 12px",borderColor:open?ACCENT+"44":"rgba(255,255,255,0.07)"}}>
-        <div style={{fontSize:36}}>{selected.flag}</div>
-        <div style={{fontSize:18,fontWeight:700,marginTop:4}}>{selected.name}</div>
-        <div style={S.tag(selected.conf)}>{selected.conf}</div>
-      </div>
-      {open&&(
-        <div style={{position:"absolute",top:"100%",left:0,right:0,background:"#0d0d20",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,zIndex:50,maxHeight:260,overflow:"hidden",display:"flex",flexDirection:"column",marginTop:4}}>
-          <input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="Search…" style={{padding:"8px 12px",background:"#111128",border:"none",borderBottom:"1px solid rgba(255,255,255,0.07)",color:"#e8e8f0",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,outline:"none"}} />
-          <div style={{overflowY:"auto",flex:1}}>
-            {filtered.map(t=>(
-              <div key={t.name} onClick={()=>{onSelect(t);setOpen(false);setQ("");}} style={{padding:"8px 12px",cursor:"pointer",display:"flex",gap:10,alignItems:"center",transition:"background .15s"}}
-                onMouseEnter={e=>e.currentTarget.style.background="#111128"}
-                onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
-                <span>{t.flag}</span>
-                <span style={{fontSize:14,fontWeight:600}}>{t.name}</span>
-                <span style={{...S.mono,fontSize:10,color:"#555",marginLeft:"auto"}}>{t.elo}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
-// ── LINEUPS SECTION ────────────────────────────────────────────────────────────
+// ── LINEUPS SECTION ──────────────────────────────────────────────────────────
 function LineupsSection(){
-  const [team,setTeam]=useState(TEAMS[0]);
-  const [result,setResult]=useState(null);
-  const [loading,setLoading]=useState(false);
-
-  const predict=async()=>{
-    setLoading(true);setResult(null);
-    try{
-      const squad=SQUADS[team.name];
-      const squadText=squad?squad.map(p=>`${p.pos}: ${p.name} (${p.club}, age ${p.age}, rating ${p.rating})`).join("\n"):"No detailed squad data — use your knowledge.";
-      const resp=await callClaude(
-        `Predict the most likely starting XI for ${team.flag} ${team.name} at FIFA World Cup 2026.
-
-Known squad data:
-${squadText}
-
-Search for the latest news on injuries, suspensions, form, and manager decisions for ${team.name}.
-
-Output your prediction in this exact format:
-FORMATION: [e.g. 4-3-3]
-STARTING XI:
-GK: [name]
-RB: [name]
-CB: [name]
-CB: [name]
-LB: [name]
-[midfield positions]:
-[attacking positions]:
-
-TACTICAL NOTES: [2 sentences on expected system]
-KEY ABSENTEES: [any injuries/suspensions from latest news]
-FORM NOTE: [1 sentence on team's recent form]`,
-        "You are a football tactics expert with access to current team news. Be specific and use latest information.",
-        true
-      );
-      setResult({text:resp});
-    }catch(e){setResult({error:e.message});}
-    setLoading(false);
-  };
-
-  const teamsWithSquads=TEAMS.filter(t=>SQUADS[t.name]);
-  const others=TEAMS.filter(t=>!SQUADS[t.name]);
-
-  return(
-    <div style={{maxWidth:900,margin:"0 auto",padding:"24px 16px 80px"}}>
-      <div style={{...S.label,marginBottom:6}}>AI Lineup Predictor</div>
-      <div style={{color:"#666",fontSize:13,marginBottom:20,...S.mono}}>Uses Claude + live web search to factor in injuries, form & manager decisions</div>
-
-      <div style={{...S.card,marginBottom:16}}>
-        <div style={{...S.label,marginBottom:12}}>Select team</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(130px,1fr))",gap:8,marginBottom:12}}>
-          {teamsWithSquads.map(t=>(
-            <div key={t.name} onClick={()=>setTeam(t)} style={{
-              padding:"10px 12px",borderRadius:8,cursor:"pointer",
-              border:`1px solid ${team.name===t.name?ACCENT+"66":"rgba(255,255,255,0.06)"}`,
-              background:team.name===t.name?"rgba(0,230,118,0.06)":"rgba(255,255,255,0.02)",
-              display:"flex",gap:8,alignItems:"center",transition:"all .15s",
-            }}>
-              <span style={{fontSize:20}}>{t.flag}</span>
-              <div>
-                <div style={{fontSize:12,fontWeight:700}}>{t.name}</div>
-                <div style={{...S.mono,fontSize:9,color:ACCENT}}>Full squad</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{...S.label,marginBottom:8}}>Other teams (AI will generate from knowledge)</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-          {others.map(t=>(
-            <div key={t.name} onClick={()=>setTeam(t)} style={{
-              padding:"5px 10px",borderRadius:5,cursor:"pointer",fontSize:13,
-              border:`1px solid ${team.name===t.name?ACCENT+"66":"rgba(255,255,255,0.06)"}`,
-              background:team.name===t.name?"rgba(0,230,118,0.06)":"transparent",
-              display:"flex",gap:6,alignItems:"center",
-            }}>
-              <span>{t.flag}</span><span>{t.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <button onClick={predict} disabled={loading} style={{width:"100%",padding:"14px 24px",border:`1px solid ${ACCENT}`,borderRadius:8,background:loading?ACCENT+"11":ACCENT+"22",color:loading?"#555":ACCENT,fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:700,letterSpacing:1,transition:"all .2s",marginBottom:20}}>
-        {loading?`⟳  Scanning news & generating ${team.name} lineup…`:`◈  Predict ${team.flag} ${team.name} Starting XI`}
-      </button>
-
-      {result&&(
-        <div style={{...S.card,borderColor:ACCENT+"33"}}>
-          {result.error?<div style={{color:"#e57373",...S.mono,fontSize:12}}>{result.error}</div>:(
-            <div style={{fontSize:14,lineHeight:1.9,color:"#ccc",whiteSpace:"pre-wrap",fontFamily:"'Space Mono',monospace"}}>{result.text}</div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  return <ComingSoon title="AI Lineup Predictor" icon="◈" desc="Select any of the 48 teams and get a predicted starting XI based on current injuries, suspensions, and form — sourced from live news via Claude AI." />;
 }
+
 
 // ── NEWS SECTION ───────────────────────────────────────────────────────────────
-const NEWS_TOPICS=[
-  "FIFA World Cup 2026 latest news",
-  "World Cup 2026 qualification updates",
-  "World Cup 2026 host cities venues",
-  "World Cup 2026 draw groups format",
-  "FIFA 2026 team preparations",
-];
 function NewsSection(){
-  const [topic,setTopic]=useState(NEWS_TOPICS[0]);
-  const [custom,setCustom]=useState("");
-  const [articles,setArticles]=useState([]);
-  const [loading,setLoading]=useState(false);
-  const [summary,setSummary]=useState(null);
-
-  const fetchNews=async(q)=>{
-    setLoading(true);setArticles([]);setSummary(null);
-    try{
-      const resp=await callClaude(
-        `Search for the latest news about: "${q}"
-
-Provide a structured news briefing in this exact JSON format (array of 5 articles, no markdown):
-[
-  {
-    "headline": "Short punchy headline",
-    "summary": "2-sentence factual summary of the story",
-    "source": "Publication name",
-    "date": "Approximate date (e.g. April 2025)",
-    "tag": "one of: Transfer|Qualification|Venue|Squad|Draw|Regulation|Form"
-  }
-]
-
-Then on a new line after the JSON, add:
-BRIEFING: [One paragraph synthesis of the overall news landscape on this topic]
-
-Return real, accurate information only.`,
-        "You are a football journalist. Search for current news and return accurate, factual information in the exact format requested.",
-        true
-      );
-      const jsonMatch=resp.match(/\[[\s\S]*?\]/);
-      const briefMatch=resp.match(/BRIEFING:([\s\S]*)/);
-      if(jsonMatch){
-        try{const parsed=JSON.parse(jsonMatch[0]);setArticles(parsed);}catch(e){setArticles([]);}
-      }
-      if(briefMatch)setSummary(briefMatch[1].trim());
-    }catch(e){setSummary(`Error: ${e.message}`);}
-    setLoading(false);
-  };
-
-  const tagColors={"Transfer":"#F5A623","Qualification":"#7ED321","Venue":"#4A90E2","Squad":"#E91E63","Draw":"#9C27B0","Regulation":"#FF6D00","Form":"#00e676"};
-
-  return(
-    <div style={{maxWidth:900,margin:"0 auto",padding:"24px 16px 80px"}}>
-      <div style={{...S.label,marginBottom:6}}>Live News Feed</div>
-      <div style={{...S.mono,fontSize:11,color:"#555",marginBottom:20}}>Powered by Claude + web search · Results reflect information at time of query</div>
-
-      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:12}}>
-        {NEWS_TOPICS.map(t=>(
-          <button key={t} onClick={()=>setTopic(t)} style={{...S.btn(topic===t),fontSize:10,padding:"5px 10px",maxWidth:200,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t}</button>
-        ))}
-      </div>
-
-      <div style={{display:"flex",gap:8,marginBottom:20}}>
-        <input value={custom} onChange={e=>setCustom(e.target.value)} placeholder="Custom search…" onKeyDown={e=>e.key==="Enter"&&custom&&fetchNews(custom)}
-          style={{flex:1,padding:"8px 14px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"#0d0d20",color:"#e8e8f0",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,outline:"none"}} />
-        <button onClick={()=>fetchNews(custom||topic)} disabled={loading} style={{padding:"8px 18px",borderRadius:6,border:`1px solid ${ACCENT}`,background:ACCENT+"22",color:loading?"#555":ACCENT,fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:700}}>
-          {loading?"…":"Search"}
-        </button>
-      </div>
-
-      {summary&&(
-        <div style={{...S.card,borderColor:ACCENT+"33",marginBottom:20}}>
-          <div style={{...S.label,marginBottom:8,color:ACCENT}}>AI Briefing</div>
-          <div style={{fontSize:14,lineHeight:1.7,color:"#ccc"}}>{summary}</div>
-        </div>
-      )}
-
-      {loading&&(
-        <div style={{...S.card,textAlign:"center",padding:"40px",color:"#555",...S.mono,fontSize:12}}>
-          ◎ Searching the web and synthesizing news…
-        </div>
-      )}
-
-      {articles.length>0&&(
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          {articles.map((a,i)=>(
-            <div key={i} style={{...S.card,transition:"border-color .2s"}}
-              onMouseEnter={e=>e.currentTarget.style.borderColor=ACCENT+"33"}
-              onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,0.07)"}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:8}}>
-                <h3 style={{fontSize:16,fontWeight:700,lineHeight:1.4,flex:1}}>{a.headline}</h3>
-                <span style={{...S.mono,fontSize:9,padding:"2px 7px",borderRadius:3,background:(tagColors[a.tag]||"#888")+"22",color:tagColors[a.tag]||"#888",flexShrink:0}}>{a.tag}</span>
-              </div>
-              <p style={{fontSize:13,color:"#999",lineHeight:1.6,marginBottom:10}}>{a.summary}</p>
-              <div style={{display:"flex",gap:12,...S.mono,fontSize:10,color:"#555"}}>
-                <span>{a.source}</span>
-                <span>·</span>
-                <span>{a.date}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {!loading&&articles.length===0&&!summary&&(
-        <div style={{...S.card,textAlign:"center",padding:"60px 24px",color:"#555"}}>
-          <div style={{fontSize:32,marginBottom:12}}>◎</div>
-          <div style={{...S.mono,fontSize:12}}>Select a topic or enter a search query above to fetch live news</div>
-        </div>
-      )}
-    </div>
-  );
+  return <ComingSoon title="Live News Feed" icon="◎" desc="Real-time World Cup 2026 news summaries, sourced and synthesised by Claude AI with web search. Covering transfers, qualifications, squad updates, and tournament news." />;
 }
+
 
 // ── ROOT ───────────────────────────────────────────────────────────────────────
 export default function FIFA2026Hub(){
