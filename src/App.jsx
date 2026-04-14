@@ -271,9 +271,7 @@ function runSim(stats){
 function mkStats(){const s={};TEAMS.forEach(t=>{s[t.name]={w:0,fn:0,sf:0,qf:0,r16:0,r32:0};});return s;}
 
 // ── CLAUDE API ──────────────────────────────────────────────────────────────────
-const ANTHROPIC_KEY = (typeof import !== "undefined" && typeof import.meta !== "undefined" && import.meta.env)
-  ? (import.meta.env.VITE_ANTHROPIC_API_KEY || "") : "";
-
+const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
 async function callClaude(userPrompt,systemPrompt="",useSearch=false){
   if(!ANTHROPIC_KEY) throw new Error("API key missing — add VITE_ANTHROPIC_API_KEY to your .env file");
   const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:userPrompt}]};
