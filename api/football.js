@@ -6,13 +6,13 @@ export default async function handler(req, res) {
   const { p } = req.query;
   if (!p) return res.status(400).json({ error: 'Missing path parameter' });
 
-  const key = process.env.VITE_APIFOOTBALL_KEY;
+  const key = process.env.VITE_FOOTBALLDATA_KEY;
   if (!key) return res.status(500).json({ error: 'API key not configured on server' });
 
   try {
-    const url = `https://v3.football.api-sports.io/${p}`;
+    const url = `https://api.football-data.org/v4/${p}`;
     const r = await fetch(url, {
-      headers: { 'x-apisports-key': key }
+      headers: { 'X-Auth-Token': key }
     });
     const data = await r.json();
     res.status(200).json(data);
