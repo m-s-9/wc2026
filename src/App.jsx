@@ -204,22 +204,22 @@ const SQUADS = {
 
 // ── VENUES ────────────────────────────────────────────────────────────────────
 const VENUES = [
-  {city:"New York / New Jersey",stadium:"MetLife Stadium",cap:"82,500",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2010,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/MetLife_Stadium_panorama.jpg/800px-MetLife_Stadium_panorama.jpg",maps:"https://maps.google.com/?q=MetLife+Stadium+East+Rutherford+NJ"},
-  {city:"Los Angeles",stadium:"SoFi Stadium",cap:"70,240",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2020,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/SoFi_Stadium_-_Inglewood%2C_California_%2848723472097%29.jpg/800px-SoFi_Stadium_-_Inglewood%2C_California_%2848723472097%29.jpg",maps:"https://maps.google.com/?q=SoFi+Stadium+Inglewood+CA"},
-  {city:"Dallas",stadium:"AT&T Stadium",cap:"80,000",country:"USA",flag:"🇺🇸",surface:"Bermuda grass",opened:2009,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/AT%26T_Stadium_2010.jpg/800px-AT%26T_Stadium_2010.jpg",maps:"https://maps.google.com/?q=AT%26T+Stadium+Arlington+TX"},
-  {city:"San Francisco Bay Area",stadium:"Levi's Stadium",cap:"68,500",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2014,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Levi%27s_Stadium_-_August_2014.jpg/800px-Levi%27s_Stadium_-_August_2014.jpg",maps:"https://maps.google.com/?q=Levis+Stadium+Santa+Clara+CA"},
-  {city:"Miami",stadium:"Hard Rock Stadium",cap:"65,326",country:"USA",flag:"🇺🇸",surface:"Grass",opened:1987,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Hard_Rock_Stadium_2016.jpg/800px-Hard_Rock_Stadium_2016.jpg",maps:"https://maps.google.com/?q=Hard+Rock+Stadium+Miami+Gardens+FL"},
-  {city:"Seattle",stadium:"Lumen Field",cap:"72,000",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2002,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Lumen_Field_2021.jpg/800px-Lumen_Field_2021.jpg",maps:"https://maps.google.com/?q=Lumen+Field+Seattle+WA"},
-  {city:"Boston",stadium:"Gillette Stadium",cap:"65,878",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2002,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Gillette_Stadium_aerial_2012.jpg/800px-Gillette_Stadium_aerial_2012.jpg",maps:"https://maps.google.com/?q=Gillette+Stadium+Foxborough+MA"},
-  {city:"Houston",stadium:"NRG Stadium",cap:"72,220",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2002,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/NRG_Stadium_2014.jpg/800px-NRG_Stadium_2014.jpg",maps:"https://maps.google.com/?q=NRG+Stadium+Houston+TX"},
-  {city:"Kansas City",stadium:"Arrowhead Stadium",cap:"76,416",country:"USA",flag:"🇺🇸",surface:"Grass",opened:1972,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Arrowhead_Stadium_2013.jpg/800px-Arrowhead_Stadium_2013.jpg",maps:"https://maps.google.com/?q=Arrowhead+Stadium+Kansas+City+MO"},
-  {city:"Atlanta",stadium:"Mercedes-Benz Stadium",cap:"75,000",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2017,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Mercedes-Benz_Stadium_2017.jpg/800px-Mercedes-Benz_Stadium_2017.jpg",maps:"https://maps.google.com/?q=Mercedes-Benz+Stadium+Atlanta+GA"},
-  {city:"Philadelphia",stadium:"Lincoln Financial Field",cap:"69,796",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2003,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Lincoln_Financial_Field_2013.jpg/800px-Lincoln_Financial_Field_2013.jpg",maps:"https://maps.google.com/?q=Lincoln+Financial+Field+Philadelphia+PA"},
-  {city:"Vancouver",stadium:"BC Place",cap:"54,500",country:"Canada",flag:"🇨🇦",surface:"FieldTurf",opened:1983,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/BC_Place_2011.jpg/800px-BC_Place_2011.jpg",maps:"https://maps.google.com/?q=BC+Place+Vancouver+BC"},
-  {city:"Toronto",stadium:"BMO Field",cap:"30,990",country:"Canada",flag:"🇨🇦",surface:"Grass",opened:2007,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/BMO_Field_2016.jpg/800px-BMO_Field_2016.jpg",maps:"https://maps.google.com/?q=BMO+Field+Toronto+ON"},
-  {city:"Guadalajara",stadium:"Estadio Akron",cap:"49,850",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:2010,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Estadio_Akron_2022.jpg/800px-Estadio_Akron_2022.jpg",maps:"https://maps.google.com/?q=Estadio+Akron+Guadalajara+Mexico"},
-  {city:"Mexico City",stadium:"Estadio Azteca",cap:"87,523",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:1966,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Estadio_Azteca_2015.jpg/800px-Estadio_Azteca_2015.jpg",maps:"https://maps.google.com/?q=Estadio+Azteca+Mexico+City"},
-  {city:"Monterrey",stadium:"Estadio BBVA",cap:"53,500",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:2015,img:"https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Estadio_BBVA_Bancomer.jpg/800px-Estadio_BBVA_Bancomer.jpg",maps:"https://maps.google.com/?q=Estadio+BBVA+Monterrey+Mexico"},
+  {city:"New York / New Jersey",stadium:"MetLife Stadium",cap:"82,500",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2010,wiki:"MetLife_Stadium",maps:"https://maps.google.com/?q=MetLife+Stadium+East+Rutherford+NJ"},
+  {city:"Los Angeles",stadium:"SoFi Stadium",cap:"70,240",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2020,wiki:"SoFi_Stadium",maps:"https://maps.google.com/?q=SoFi+Stadium+Inglewood+CA"},
+  {city:"Dallas",stadium:"AT&T Stadium",cap:"80,000",country:"USA",flag:"🇺🇸",surface:"Bermuda grass",opened:2009,wiki:"AT%26T_Stadium",maps:"https://maps.google.com/?q=AT%26T+Stadium+Arlington+TX"},
+  {city:"San Francisco Bay Area",stadium:"Levi's Stadium",cap:"68,500",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2014,wiki:"Levi%27s_Stadium",maps:"https://maps.google.com/?q=Levis+Stadium+Santa+Clara+CA"},
+  {city:"Miami",stadium:"Hard Rock Stadium",cap:"65,326",country:"USA",flag:"🇺🇸",surface:"Grass",opened:1987,wiki:"Hard_Rock_Stadium",maps:"https://maps.google.com/?q=Hard+Rock+Stadium+Miami+Gardens+FL"},
+  {city:"Seattle",stadium:"Lumen Field",cap:"72,000",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2002,wiki:"Lumen_Field",maps:"https://maps.google.com/?q=Lumen+Field+Seattle+WA"},
+  {city:"Boston",stadium:"Gillette Stadium",cap:"65,878",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2002,wiki:"Gillette_Stadium",maps:"https://maps.google.com/?q=Gillette+Stadium+Foxborough+MA"},
+  {city:"Houston",stadium:"NRG Stadium",cap:"72,220",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2002,wiki:"NRG_Stadium",maps:"https://maps.google.com/?q=NRG+Stadium+Houston+TX"},
+  {city:"Kansas City",stadium:"Arrowhead_Stadium",cap:"76,416",country:"USA",flag:"🇺🇸",surface:"Grass",opened:1972,wiki:"Arrowhead_Stadium",maps:"https://maps.google.com/?q=Arrowhead+Stadium+Kansas+City+MO"},
+  {city:"Atlanta",stadium:"Mercedes-Benz Stadium",cap:"75,000",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2017,wiki:"Mercedes-Benz_Stadium",maps:"https://maps.google.com/?q=Mercedes-Benz+Stadium+Atlanta+GA"},
+  {city:"Philadelphia",stadium:"Lincoln Financial Field",cap:"69,796",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2003,wiki:"Lincoln_Financial_Field",maps:"https://maps.google.com/?q=Lincoln+Financial+Field+Philadelphia+PA"},
+  {city:"Vancouver",stadium:"BC Place",cap:"54,500",country:"Canada",flag:"🇨🇦",surface:"FieldTurf",opened:1983,wiki:"BC_Place",maps:"https://maps.google.com/?q=BC+Place+Vancouver+BC"},
+  {city:"Toronto",stadium:"BMO Field",cap:"30,990",country:"Canada",flag:"🇨🇦",surface:"Grass",opened:2007,wiki:"BMO_Field",maps:"https://maps.google.com/?q=BMO+Field+Toronto+ON"},
+  {city:"Guadalajara",stadium:"Estadio Akron",cap:"49,850",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:2010,wiki:"Estadio_Akron",maps:"https://maps.google.com/?q=Estadio+Akron+Guadalajara+Mexico"},
+  {city:"Mexico City",stadium:"Estadio Azteca",cap:"87,523",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:1966,wiki:"Estadio_Azteca",maps:"https://maps.google.com/?q=Estadio+Azteca+Mexico+City"},
+  {city:"Monterrey",stadium:"Estadio BBVA",cap:"53,500",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:2015,wiki:"Estadio_BBVA",maps:"https://maps.google.com/?q=Estadio+BBVA+Monterrey+Mexico"},
 ];
 
 // ── SIMULATION ────────────────────────────────────────────────────────────────
@@ -330,16 +330,37 @@ function Nav({tab,setTab}){
 
 // ── VENUE MODAL ───────────────────────────────────────────────────────────────
 function VenueModal({venue,onClose}){
-  const [imgErr,setImgErr]=useState(false);
+  const [imgUrl,setImgUrl]=useState(null);
+  const [imgLoading,setImgLoading]=useState(true);
+
+  useEffect(()=>{
+    setImgUrl(null);setImgLoading(true);
+    const apiUrl=`https://en.wikipedia.org/w/api.php?action=query&titles=${venue.wiki}&prop=pageimages&format=json&pithumbsize=800&origin=*`;
+    fetch(apiUrl)
+      .then(r=>r.json())
+      .then(data=>{
+        const pages=data.query.pages;
+        const page=Object.values(pages)[0];
+        if(page.thumbnail?.source){setImgUrl(page.thumbnail.source);}
+        setImgLoading(false);
+      })
+      .catch(()=>setImgLoading(false));
+  },[venue.wiki]);
+
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.55)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:520,overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.25)"}}>
         {/* Image */}
         <div style={{height:220,background:T.border,position:"relative",overflow:"hidden"}}>
-          {!imgErr?(
-            <img src={venue.img} alt={venue.stadium} onError={()=>setImgErr(true)}
-              style={{width:"100%",height:"100%",objectFit:"cover"}} />
-          ):(
+          {imgLoading&&(
+            <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center"}}>
+              <div style={{...B,fontSize:13,color:T.faint}}>Loading…</div>
+            </div>
+          )}
+          {!imgLoading&&imgUrl&&(
+            <img src={imgUrl} alt={venue.stadium} style={{width:"100%",height:"100%",objectFit:"cover"}} />
+          )}
+          {!imgLoading&&!imgUrl&&(
             <div style={{height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}>
               <div style={{fontSize:40}}>🏟️</div>
               <div style={{...B,fontSize:13,color:T.faint}}>{venue.stadium}</div>
@@ -368,7 +389,7 @@ function VenueModal({venue,onClose}){
               </div>
             ))}
           </div>
-          <a href={venue.maps} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:8,padding:"10px 16px",borderRadius:8,border:`1px solid ${T.border}`,background:T.bg,...B,fontSize:13,fontWeight:500,color:T.muted,textDecoration:"none",transition:"border-color .15s"}}>
+          <a href={venue.maps} target="_blank" rel="noopener noreferrer" style={{display:"flex",alignItems:"center",gap:8,padding:"10px 16px",borderRadius:8,border:`1px solid ${T.border}`,background:T.bg,...B,fontSize:13,fontWeight:500,color:T.muted,textDecoration:"none"}}>
             <span>📍</span> View on Google Maps
           </a>
         </div>
