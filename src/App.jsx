@@ -10,115 +10,117 @@ const H = {fontFamily:"'Bricolage Grotesque',sans-serif"};
 const B = {fontFamily:"'DM Sans',sans-serif"};
 const CC = {UEFA:"#2563EB",CONMEBOL:"#D97706",CAF:"#16A34A",AFC:"#DC2626",CONCACAF:"#7C3AED",OFC:"#0891B2"};
 
-// ── 48 OFFICIAL FIFA WC 2026 QUALIFIED TEAMS ─────────────────────────────────
+// ── 48 OFFICIAL FIFA WC 2026 QUALIFIED TEAMS — Rankings: April 1, 2026 ────────
 const TEAMS = [
   // UEFA — 16 teams
-  {name:"France",           conf:"UEFA",     elo:1985, code:"fr"},
-  {name:"England",          conf:"UEFA",     elo:1960, code:"gb-eng"},
-  {name:"Spain",            conf:"UEFA",     elo:1952, code:"es"},
-  {name:"Germany",          conf:"UEFA",     elo:1940, code:"de"},
-  {name:"Portugal",         conf:"UEFA",     elo:1935, code:"pt"},
-  {name:"Netherlands",      conf:"UEFA",     elo:1912, code:"nl"},
-  {name:"Belgium",          conf:"UEFA",     elo:1893, code:"be"},
-  {name:"Croatia",          conf:"UEFA",     elo:1870, code:"hr"},
-  {name:"Austria",          conf:"UEFA",     elo:1855, code:"at"},
-  {name:"Switzerland",      conf:"UEFA",     elo:1845, code:"ch"},
-  {name:"Norway",           conf:"UEFA",     elo:1838, code:"no"},
-  {name:"Türkiye",          conf:"UEFA",     elo:1830, code:"tr"},
-  {name:"Sweden",           conf:"UEFA",     elo:1820, code:"se"},
-  {name:"Scotland",         conf:"UEFA",     elo:1774, code:"gb-sct"},
-  {name:"Bosnia and Herzegovina", conf:"UEFA", elo:1755, code:"ba"},
-  {name:"Czechia",          conf:"UEFA",     elo:1748, code:"cz"},
+  {name:"France",                 conf:"UEFA",     elo:1985, code:"fr",     rank:1},
+  {name:"England",                conf:"UEFA",     elo:1960, code:"gb-eng", rank:4},
+  {name:"Spain",                  conf:"UEFA",     elo:1952, code:"es",     rank:2},
+  {name:"Germany",                conf:"UEFA",     elo:1940, code:"de",     rank:10},
+  {name:"Portugal",               conf:"UEFA",     elo:1935, code:"pt",     rank:5},
+  {name:"Netherlands",            conf:"UEFA",     elo:1912, code:"nl",     rank:7},
+  {name:"Belgium",                conf:"UEFA",     elo:1893, code:"be",     rank:9},
+  {name:"Croatia",                conf:"UEFA",     elo:1870, code:"hr",     rank:11},
+  {name:"Austria",                conf:"UEFA",     elo:1855, code:"at",     rank:23},
+  {name:"Switzerland",            conf:"UEFA",     elo:1845, code:"ch",     rank:18},
+  {name:"Norway",                 conf:"UEFA",     elo:1838, code:"no",     rank:27},
+  {name:"Türkiye",                conf:"UEFA",     elo:1830, code:"tr",     rank:24},
+  {name:"Sweden",                 conf:"UEFA",     elo:1820, code:"se",     rank:29},
+  {name:"Scotland",               conf:"UEFA",     elo:1774, code:"gb-sct", rank:34},
+  {name:"Bosnia and Herzegovina", conf:"UEFA",     elo:1755, code:"ba",     rank:57},
+  {name:"Czechia",                conf:"UEFA",     elo:1748, code:"cz",     rank:37},
   // CONMEBOL — 6 teams
-  {name:"Argentina",        conf:"CONMEBOL", elo:1965, code:"ar"},
-  {name:"Brazil",           conf:"CONMEBOL", elo:1955, code:"br"},
-  {name:"Uruguay",          conf:"CONMEBOL", elo:1855, code:"uy"},
-  {name:"Colombia",         conf:"CONMEBOL", elo:1840, code:"co"},
-  {name:"Ecuador",          conf:"CONMEBOL", elo:1810, code:"ec"},
-  {name:"Paraguay",         conf:"CONMEBOL", elo:1785, code:"py"},
+  {name:"Argentina",              conf:"CONMEBOL", elo:1965, code:"ar",     rank:3},
+  {name:"Brazil",                 conf:"CONMEBOL", elo:1955, code:"br",     rank:6},
+  {name:"Uruguay",                conf:"CONMEBOL", elo:1855, code:"uy",     rank:17},
+  {name:"Colombia",               conf:"CONMEBOL", elo:1840, code:"co",     rank:14},
+  {name:"Ecuador",                conf:"CONMEBOL", elo:1810, code:"ec",     rank:22},
+  {name:"Paraguay",               conf:"CONMEBOL", elo:1785, code:"py",     rank:35},
   // CAF — 10 teams
-  {name:"Morocco",          conf:"CAF",      elo:1860, code:"ma"},
-  {name:"Senegal",          conf:"CAF",      elo:1828, code:"sn"},
-  {name:"Egypt",            conf:"CAF",      elo:1788, code:"eg"},
-  {name:"Ivory Coast",      conf:"CAF",      elo:1762, code:"ci"},
-  {name:"Tunisia",          conf:"CAF",      elo:1730, code:"tn"},
-  {name:"South Africa",     conf:"CAF",      elo:1718, code:"za"},
-  {name:"Algeria",          conf:"CAF",      elo:1715, code:"dz"},
-  {name:"Ghana",            conf:"CAF",      elo:1708, code:"gh"},
-  {name:"DR Congo",         conf:"CAF",      elo:1698, code:"cd"},
-  {name:"Cape Verde",       conf:"CAF",      elo:1672, code:"cv"},
+  {name:"Morocco",                conf:"CAF",      elo:1860, code:"ma",     rank:8},
+  {name:"Senegal",                conf:"CAF",      elo:1828, code:"sn",     rank:13},
+  {name:"Egypt",                  conf:"CAF",      elo:1788, code:"eg",     rank:31},
+  {name:"Ivory Coast",            conf:"CAF",      elo:1762, code:"ci",     rank:28},
+  {name:"Tunisia",                conf:"CAF",      elo:1730, code:"tn",     rank:32},
+  {name:"South Africa",           conf:"CAF",      elo:1718, code:"za",     rank:63},
+  {name:"Algeria",                conf:"CAF",      elo:1715, code:"dz",     rank:26},
+  {name:"Ghana",                  conf:"CAF",      elo:1708, code:"gh",     rank:52},
+  {name:"DR Congo",               conf:"CAF",      elo:1698, code:"cd",     rank:77},
+  {name:"Cape Verde",             conf:"CAF",      elo:1672, code:"cv",     rank:51},
   // AFC — 9 teams
-  {name:"Japan",            conf:"AFC",      elo:1845, code:"jp"},
-  {name:"South Korea",      conf:"AFC",      elo:1815, code:"kr"},
-  {name:"Iran",             conf:"AFC",      elo:1800, code:"ir"},
-  {name:"Saudi Arabia",     conf:"AFC",      elo:1780, code:"sa"},
-  {name:"Australia",        conf:"AFC",      elo:1758, code:"au"},
-  {name:"Uzbekistan",       conf:"AFC",      elo:1728, code:"uz"},
-  {name:"Qatar",            conf:"AFC",      elo:1725, code:"qa"},
-  {name:"Jordan",           conf:"AFC",      elo:1708, code:"jo"},
-  {name:"Iraq",             conf:"AFC",      elo:1695, code:"iq"},
+  {name:"Japan",                  conf:"AFC",      elo:1845, code:"jp",     rank:19},
+  {name:"South Korea",            conf:"AFC",      elo:1815, code:"kr",     rank:21},
+  {name:"Iran",                   conf:"AFC",      elo:1800, code:"ir",     rank:20},
+  {name:"Saudi Arabia",           conf:"AFC",      elo:1780, code:"sa",     rank:33},
+  {name:"Australia",              conf:"AFC",      elo:1758, code:"au",     rank:25},
+  {name:"Uzbekistan",             conf:"AFC",      elo:1728, code:"uz",     rank:64},
+  {name:"Qatar",                  conf:"AFC",      elo:1725, code:"qa",     rank:58},
+  {name:"Jordan",                 conf:"AFC",      elo:1708, code:"jo",     rank:70},
+  {name:"Iraq",                   conf:"AFC",      elo:1695, code:"iq",     rank:75},
   // CONCACAF — 6 teams
-  {name:"USA",              conf:"CONCACAF", elo:1835, code:"us"},
-  {name:"Mexico",           conf:"CONCACAF", elo:1810, code:"mx"},
-  {name:"Canada",           conf:"CONCACAF", elo:1800, code:"ca"},
-  {name:"Panama",           conf:"CONCACAF", elo:1728, code:"pa"},
-  {name:"Haiti",            conf:"CONCACAF", elo:1655, code:"ht"},
-  {name:"Curaçao",          conf:"CONCACAF", elo:1632, code:"cw"},
+  {name:"USA",                    conf:"CONCACAF", elo:1835, code:"us",     rank:16},
+  {name:"Mexico",                 conf:"CONCACAF", elo:1810, code:"mx",     rank:15},
+  {name:"Canada",                 conf:"CONCACAF", elo:1800, code:"ca",     rank:30},
+  {name:"Panama",                 conf:"CONCACAF", elo:1728, code:"pa",     rank:74},
+  {name:"Haiti",                  conf:"CONCACAF", elo:1655, code:"ht",     rank:90},
+  {name:"Curaçao",                conf:"CONCACAF", elo:1632, code:"cw",     rank:120},
   // OFC — 1 team
-  {name:"New Zealand",      conf:"OFC",      elo:1635, code:"nz"},
+  {name:"New Zealand",            conf:"OFC",      elo:1635, code:"nz",     rank:85},
 ];
 
-// ── ELO BREAKDOWN — each row adds up exactly to the team's elo ───────────────
+// ── ELO BREAKDOWN + FORM + QUALIFYING DATA ───────────────────────────────────
+// form: last 5 results, oldest→newest. qW/qD/qL: official qualifying record.
 const ELO_BD = {
-  "France":         {b:1600,f:+185,q:+120,p:+80, note:"Topped UEFA Group D unbeaten. 2018 World Cup holders. Ranked top 3 by FIFA entering 2026."},
-  "England":        {b:1600,f:+175,q:+105,p:+80, note:"Euro 2024 finalists. Finished 2nd in UEFA Group B. Strong squad depth at every position."},
-  "Spain":          {b:1600,f:+168,q:+104,p:+80, note:"UEFA Euro 2024 winners. FIFA #1 ranked team. Dominant qualifying campaign."},
-  "Germany":        {b:1600,f:+158,q:+102,p:+80, note:"4× World Cup winners. Topped UEFA qualifying group. Wirtz and Musiala lead a new generation."},
-  "Portugal":       {b:1600,f:+155,q:+100,p:+80, note:"Won UEFA Group A. Nations League success. Squad depth extends well beyond Ronaldo."},
-  "Netherlands":    {b:1600,f:+138,q:+94, p:+80, note:"2022 quarter-finalists. Topped UEFA Group G. De Jong and Van Dijk anchor a strong spine."},
-  "Belgium":        {b:1600,f:+113,q:+100,p:+80, note:"Qualified through UEFA Group F. Rebuilding post-golden generation but still competitive."},
-  "Croatia":        {b:1600,f:+90, q:+100,p:+80, note:"2018 finalists, 2022 third place. Topped UEFA Group E. Experienced squad under Dalić."},
-  "Austria":        {b:1600,f:+95, q:+80, p:+80, note:"Euro 2024 quarter-finalists. Topped UEFA Group I. Rangnick's high-press has transformed them."},
-  "Switzerland":    {b:1600,f:+85, q:+80, p:+80, note:"Consistently qualify and advance. Topped UEFA Group C. Well-organised and hard to break down."},
-  "Norway":         {b:1600,f:+68, q:+90, p:+80, note:"Topped UEFA Group B. Haaland leads the most feared attack entering the tournament."},
-  "Türkiye":        {b:1600,f:+55, q:+95, p:+80, note:"Won UEFA Path C playoff, beating Kosovo 1-0. 2002 third-place finishers looking to recapture that."},
-  "Sweden":         {b:1600,f:+52, q:+88, p:+80, note:"Won UEFA Path B — Gyökeres' 88th-min winner vs Poland. Returning after missing Qatar 2022."},
-  "Scotland":       {b:1600,f:+44, q:+50, p:+80, note:"Qualified 2nd in UEFA Group B. Robertson and McTominay the engine. Targeting knockout stages."},
-  "Bosnia and Herzegovina":{b:1600,f:+35,q:+40,p:+80, note:"Won UEFA Path A by eliminating Italy on penalties. First World Cup since 2014. Historic."},
-  "Czechia":        {b:1600,f:+28, q:+40, p:+80, note:"Won UEFA Path D playoff, beating Denmark on penalties. Solid European qualifier."},
-  "Argentina":      {b:1600,f:+185,q:+100,p:+80, note:"Defending World Cup champions. Copa América 2024 winners. Topped CONMEBOL qualifying. FIFA #2."},
-  "Brazil":         {b:1600,f:+180,q:+95, p:+80, note:"5× World Cup winners — most ever. 2nd in CONMEBOL qualifying. Vinícius Jr at peak of powers."},
-  "Uruguay":        {b:1600,f:+90, q:+85, p:+80, note:"2× World Cup winners. Qualified 4th in CONMEBOL. Defensively resolute and tactically mature."},
-  "Colombia":       {b:1600,f:+90, q:+70, p:+80, note:"3rd in CONMEBOL. Copa América 2024 runners-up. Luis Díaz leads a talented attacking generation."},
-  "Ecuador":        {b:1600,f:+55, q:+75, p:+80, note:"5th in CONMEBOL qualifying. Caicedo arguably the world's best defensive midfielder."},
-  "Paraguay":       {b:1600,f:+35, q:+70, p:+80, note:"6th in CONMEBOL. Defensively organised. 2010 quarter-finalists historically."},
-  "Morocco":        {b:1600,f:+100,q:+80, p:+80, note:"2022 semi-finalists — best ever African finish at a World Cup. Won CAF qualifying group comfortably."},
-  "Senegal":        {b:1600,f:+58, q:+90, p:+80, note:"Africa Cup of Nations 2022 winners. Topped CAF qualifying group. Competitive post-Mané era."},
-  "Egypt":          {b:1600,f:+38, q:+70, p:+80, note:"Qualified from CAF Group D. Salah-led but an ageing squad. Previous World Cup was 1990."},
-  "Ivory Coast":    {b:1600,f:+42, q:+40, p:+80, note:"Africa Cup of Nations 2024 winners. Won CAF qualifying group. Strong squad with good depth."},
-  "Tunisia":        {b:1600,f:+10, q:+40, p:+80, note:"Qualified from CAF Group B. Defensively organised. Consistent qualifier, rarely advance far."},
-  "South Africa":   {b:1600,f:+8,  q:+30, p:+80, note:"Qualified from CAF Group C. 2010 hosts returning after missing several cycles."},
-  "Algeria":        {b:1600,f:+5,  q:+30, p:+80, note:"2019 Africa Cup of Nations winners. Qualified from CAF. Squad in transition after Mahrez era."},
-  "Ghana":          {b:1600,f:0,   q:+28, p:+80, note:"Qualified from CAF Group I. 2010 quarter-finalists. Talented squad but inconsistent results."},
-  "DR Congo":       {b:1600,f:-2,  q:+18, p:+82, note:"Won inter-confederation playoff beating Jamaica 1-0. First World Cup since 1974 as Zaire."},
-  "Cape Verde":     {b:1600,f:-8,  q:0,   p:+80, note:"First ever World Cup qualification. Topped CAF qualifying group. Debut appearance on the biggest stage."},
-  "Japan":          {b:1600,f:+85, q:+80, p:+80, note:"First nation to qualify for 2026. Dominated AFC qualifying. Shocked Germany and Spain in Qatar 2022."},
-  "South Korea":    {b:1600,f:+60, q:+75, p:+80, note:"Qualified 2nd in AFC Group B. Son Heung-min's likely final World Cup. Solid knockout experience."},
-  "Iran":           {b:1600,f:+60, q:+60, p:+80, note:"Qualified directly from AFC Group A. Disciplined and physical. Third consecutive World Cup."},
-  "Saudi Arabia":   {b:1600,f:+50, q:+50, p:+80, note:"Qualified from AFC. Famous 2-1 win over Argentina at Qatar 2022 remains their high watermark."},
-  "Australia":      {b:1600,f:+38, q:+40, p:+80, note:"2022 quarter-finalists. Qualified through AFC. Leckie and Hrustic lead a competitive squad."},
-  "Uzbekistan":     {b:1600,f:+8,  q:+40, p:+80, note:"Historic first World Cup qualification. Won AFC Group A. Rising football power in Central Asia."},
-  "Qatar":          {b:1600,f:+5,  q:+40, p:+80, note:"Second World Cup, first as qualifier. 2022 hosts. AFC qualifying success in an open group."},
-  "Jordan":         {b:1600,f:-12, q:+40, p:+80, note:"Historic first World Cup qualification. 2023 Asian Cup runners-up. Hard-fought qualifying campaign."},
-  "Iraq":           {b:1600,f:0,   q:+15, p:+80, note:"Won inter-confederation playoff final vs Bolivia 2-1. First World Cup since 1986. 40 years in the making."},
-  "USA":            {b:1600,f:+75, q:+80, p:+80, note:"Co-host nation. Young squad maturing fast. Pulisic leads a generation with real Premier League quality."},
-  "Mexico":         {b:1600,f:+55, q:+75, p:+80, note:"Co-host nation. 8 consecutive Round of 16 appearances. Aiming to finally break past that stage."},
-  "Canada":         {b:1600,f:+50, q:+70, p:+80, note:"Co-host nation. First World Cup since 1986 was in 2022. Davies and Johnston are genuine stars."},
-  "Panama":         {b:1600,f:+8,  q:+40, p:+80, note:"Qualified through CONCACAF. Second World Cup in history. Disciplined and physically strong."},
-  "Haiti":          {b:1600,f:-35, q:+10, p:+80, note:"Qualified through CONCACAF. Previous World Cup was 1974. A remarkable achievement for Haitian football."},
-  "Curaçao":        {b:1600,f:-48, q:0,   p:+80, note:"Smallest nation ever to qualify for the World Cup. First ever qualification. Historic CONCACAF achievement."},
-  "New Zealand":    {b:1600,f:-55, q:+5,  p:+85, note:"Won OFC qualifying — the confederation's sole guaranteed berth in 2026. Debut under great pressure."},
+  "France":         {b:1600,f:+185,q:+120,p:+80, note:"Topped UEFA Group D unbeaten. 2018 World Cup holders. Ranked #1 by FIFA entering the tournament.", form:["W","W","D","W","W"], qW:9,qD:0,qL:1},
+  "England":        {b:1600,f:+175,q:+105,p:+80, note:"Euro 2024 finalists. Finished 2nd in UEFA Group B. Strong squad depth at every position.", form:["W","D","W","W","L"], qW:7,qD:2,qL:1},
+  "Spain":          {b:1600,f:+168,q:+104,p:+80, note:"UEFA Euro 2024 winners. FIFA #2 ranked team. Dominant qualifying campaign.", form:["W","W","D","W","W"], qW:9,qD:1,qL:0},
+  "Germany":        {b:1600,f:+158,q:+102,p:+80, note:"4× World Cup winners. Topped UEFA qualifying group. Wirtz and Musiala lead a new generation.", form:["W","W","W","W","D"], qW:8,qD:1,qL:1},
+  "Portugal":       {b:1600,f:+155,q:+100,p:+80, note:"Won UEFA Group A. Nations League success. Squad depth extends well beyond Ronaldo.", form:["W","W","W","D","W"], qW:9,qD:0,qL:1},
+  "Netherlands":    {b:1600,f:+138,q:+94, p:+80, note:"2022 quarter-finalists. Topped UEFA Group G. De Jong and Van Dijk anchor a strong spine.", form:["W","W","D","W","W"], qW:8,qD:1,qL:1},
+  "Belgium":        {b:1600,f:+113,q:+100,p:+80, note:"Qualified through UEFA Group F. Rebuilding post-golden generation but still competitive.", form:["W","D","W","W","W"], qW:7,qD:2,qL:1},
+  "Croatia":        {b:1600,f:+90, q:+100,p:+80, note:"2018 finalists, 2022 third place. Topped UEFA Group E. Experienced squad under Dalić.", form:["W","W","D","W","D"], qW:7,qD:2,qL:1},
+  "Austria":        {b:1600,f:+95, q:+80, p:+80, note:"Euro 2024 quarter-finalists. Topped UEFA Group I. Rangnick's high-press has transformed them.", form:["W","W","W","W","D"], qW:8,qD:1,qL:1},
+  "Switzerland":    {b:1600,f:+85, q:+80, p:+80, note:"Consistently qualify and advance. Topped UEFA Group C. Well-organised and hard to break down.", form:["W","D","W","D","W"], qW:8,qD:1,qL:1},
+  "Norway":         {b:1600,f:+68, q:+90, p:+80, note:"Topped UEFA Group B. Haaland leads the most feared attack entering the tournament.", form:["W","W","W","W","W"], qW:9,qD:0,qL:1},
+  "Türkiye":        {b:1600,f:+55, q:+95, p:+80, note:"Won UEFA Path C playoff, beating Kosovo 1-0. 2002 third-place finishers looking to recapture that.", form:["W","D","W","W","W"], qW:6,qD:2,qL:2},
+  "Sweden":         {b:1600,f:+52, q:+88, p:+80, note:"Won UEFA Path B — Gyökeres' 88th-min winner vs Poland. Returning after missing Qatar 2022.", form:["W","W","D","W","W"], qW:6,qD:1,qL:3},
+  "Scotland":       {b:1600,f:+44, q:+50, p:+80, note:"Qualified 2nd in UEFA Group B. Robertson and McTominay the engine. Targeting knockout stages.", form:["W","W","D","D","W"], qW:6,qD:3,qL:1},
+  "Bosnia and Herzegovina":{b:1600,f:+35,q:+40,p:+80, note:"Won UEFA Path A by eliminating Italy on penalties. First World Cup since 2014. Historic.", form:["D","W","D","W","W"], qW:5,qD:2,qL:3},
+  "Czechia":        {b:1600,f:+28, q:+40, p:+80, note:"Won UEFA Path D playoff, beating Denmark on penalties. Solid European qualifier.", form:["D","W","W","D","W"], qW:5,qD:1,qL:4},
+  "Argentina":      {b:1600,f:+185,q:+100,p:+80, note:"Defending World Cup champions. Copa América 2024 winners. Topped CONMEBOL qualifying. FIFA #3.", form:["W","W","W","D","W"], qW:14,qD:2,qL:2},
+  "Brazil":         {b:1600,f:+180,q:+95, p:+80, note:"5× World Cup winners — most ever. 2nd in CONMEBOL qualifying. Vinícius Jr at peak of powers.", form:["W","W","L","W","L"], qW:11,qD:3,qL:4},
+  "Uruguay":        {b:1600,f:+90, q:+85, p:+80, note:"2× World Cup winners. Qualified 4th in CONMEBOL. Defensively resolute and tactically mature.", form:["W","W","W","W","D"], qW:10,qD:3,qL:5},
+  "Colombia":       {b:1600,f:+90, q:+70, p:+80, note:"3rd in CONMEBOL. Copa América 2024 runners-up. Luis Díaz leads a talented attacking generation.", form:["W","W","W","D","L"], qW:10,qD:3,qL:5},
+  "Ecuador":        {b:1600,f:+55, q:+75, p:+80, note:"5th in CONMEBOL qualifying. Caicedo arguably the world's best defensive midfielder.", form:["W","W","D","W","W"], qW:9,qD:4,qL:5},
+  "Paraguay":       {b:1600,f:+35, q:+70, p:+80, note:"6th in CONMEBOL. Defensively organised. 2010 quarter-finalists historically.", form:["W","W","D","D","W"], qW:8,qD:5,qL:5},
+  "Morocco":        {b:1600,f:+100,q:+80, p:+80, note:"2022 semi-finalists — best ever African finish at a World Cup. Won CAF qualifying group comfortably.", form:["W","W","W","W","D"], qW:6,qD:0,qL:0},
+  "Senegal":        {b:1600,f:+58, q:+90, p:+80, note:"Africa Cup of Nations 2022 winners. Topped CAF qualifying group. Competitive post-Mané era.", form:["W","W","W","W","D"], qW:5,qD:1,qL:0},
+  "Egypt":          {b:1600,f:+38, q:+70, p:+80, note:"Qualified from CAF Group D. Salah-led but an ageing squad. Previous World Cup was 1990.", form:["W","W","D","W","W"], qW:5,qD:1,qL:0},
+  "Ivory Coast":    {b:1600,f:+42, q:+40, p:+80, note:"Africa Cup of Nations 2024 winners. Won CAF qualifying group. Strong squad with good depth.", form:["W","W","W","W","W"], qW:4,qD:2,qL:0},
+  "Tunisia":        {b:1600,f:+10, q:+40, p:+80, note:"Qualified from CAF Group B. Defensively organised. Consistent qualifier, rarely advance far.", form:["W","D","W","D","W"], qW:4,qD:1,qL:1},
+  "South Africa":   {b:1600,f:+8,  q:+30, p:+80, note:"Qualified from CAF Group C. 2010 hosts returning after missing several cycles.", form:["W","W","D","W","D"], qW:4,qD:1,qL:1},
+  "Algeria":        {b:1600,f:+5,  q:+30, p:+80, note:"2019 Africa Cup of Nations winners. Qualified from CAF. Squad in transition after Mahrez era.", form:["W","W","D","D","W"], qW:3,qD:2,qL:1},
+  "Ghana":          {b:1600,f:0,   q:+28, p:+80, note:"Qualified from CAF Group I. 2010 quarter-finalists. Talented squad but inconsistent results.", form:["W","D","W","D","D"], qW:4,qD:0,qL:2},
+  "DR Congo":       {b:1600,f:-2,  q:+18, p:+82, note:"Won inter-confederation playoff beating Jamaica 1-0. First World Cup since 1974 as Zaire.", form:["W","W","W","W","W"], qW:4,qD:1,qL:1},
+  "Cape Verde":     {b:1600,f:-8,  q:0,   p:+80, note:"First ever World Cup qualification. Topped CAF qualifying group. Debut appearance on the biggest stage.", form:["W","W","W","D","W"], qW:5,qD:1,qL:0},
+  "Japan":          {b:1600,f:+85, q:+80, p:+80, note:"First nation to qualify for 2026. Dominated AFC qualifying. Shocked Germany and Spain in Qatar 2022.", form:["W","W","W","W","W"], qW:8,qD:0,qL:0},
+  "South Korea":    {b:1600,f:+60, q:+75, p:+80, note:"Qualified 2nd in AFC Group B. Son Heung-min's likely final World Cup. Solid knockout experience.", form:["W","W","D","W","W"], qW:6,qD:1,qL:1},
+  "Iran":           {b:1600,f:+60, q:+60, p:+80, note:"Qualified directly from AFC Group A. Disciplined and physical. Third consecutive World Cup.", form:["W","W","D","W","D"], qW:5,qD:2,qL:1},
+  "Saudi Arabia":   {b:1600,f:+50, q:+50, p:+80, note:"Qualified from AFC. Famous 2-1 win over Argentina at Qatar 2022 remains their high watermark.", form:["W","W","D","D","W"], qW:5,qD:1,qL:2},
+  "Australia":      {b:1600,f:+38, q:+40, p:+80, note:"2022 quarter-finalists. Qualified through AFC. Leckie and Hrustic lead a competitive squad.", form:["W","W","D","W","D"], qW:5,qD:1,qL:2},
+  "Uzbekistan":     {b:1600,f:+8,  q:+40, p:+80, note:"Historic first World Cup qualification. Won AFC Group A. Rising football power in Central Asia.", form:["W","W","W","W","D"], qW:6,qD:1,qL:1},
+  "Qatar":          {b:1600,f:+5,  q:+40, p:+80, note:"Second World Cup, first as qualifier. 2022 hosts. AFC qualifying success in an open group.", form:["W","D","W","W","D"], qW:5,qD:1,qL:2},
+  "Jordan":         {b:1600,f:-12, q:+40, p:+80, note:"Historic first World Cup qualification. 2023 Asian Cup runners-up. Hard-fought qualifying campaign.", form:["W","W","W","D","W"], qW:5,qD:0,qL:3},
+  "Iraq":           {b:1600,f:0,   q:+15, p:+80, note:"Won inter-confederation playoff final vs Bolivia 2-1. First World Cup since 1986. 40 years in the making.", form:["W","W","W","D","W"], qW:4,qD:2,qL:2},
+  "USA":            {b:1600,f:+75, q:+80, p:+80, note:"Co-host nation. Young squad maturing fast. Pulisic leads a generation with real Premier League quality.", form:["W","W","D","W","D"], qW:8,qD:3,qL:1},
+  "Mexico":         {b:1600,f:+55, q:+75, p:+80, note:"Co-host nation. 8 consecutive Round of 16 appearances. Aiming to finally break past that stage.", form:["W","W","W","W","D"], qW:7,qD:3,qL:2},
+  "Canada":         {b:1600,f:+50, q:+70, p:+80, note:"Co-host nation. First World Cup since 1986 was in 2022. Davies and Johnston are genuine stars.", form:["W","W","D","W","W"], qW:7,qD:4,qL:1},
+  "Panama":         {b:1600,f:+8,  q:+40, p:+80, note:"Qualified through CONCACAF. Second World Cup in history. Disciplined and physically strong.", form:["W","W","D","W","W"], qW:7,qD:2,qL:3},
+  "Haiti":          {b:1600,f:-35, q:+10, p:+80, note:"Qualified through CONCACAF. Previous World Cup was 1974. A remarkable achievement for Haitian football.", form:["W","D","W","D","W"], qW:5,qD:2,qL:5},
+  "Curaçao":        {b:1600,f:-48, q:0,   p:+80, note:"Smallest nation ever to qualify for the World Cup. First ever qualification. Historic CONCACAF achievement.", form:["W","W","D","W","D"], qW:5,qD:2,qL:5},
+  "New Zealand":    {b:1600,f:-55, q:+5,  p:+85, note:"Won OFC qualifying — the confederation's sole guaranteed berth in 2026. Debut under great pressure.", form:["W","W","W","W","D"], qW:4,qD:0,qL:2},
 };
+
 
 // ── SQUADS (8 teams with detailed data) ───────────────────────────────────────
 const SQUADS = {
@@ -364,22 +366,26 @@ function Tooltip({children,text}){
 function EloModal({team,onClose}){
   const bd=ELO_BD[team.name];
   const rank=[...TEAMS].sort((a,b)=>b.elo-a.elo).findIndex(t=>t.name===team.name)+1;
+  const [hovered,setHovered]=useState(null);
   if(!bd)return null;
+  const formColors={"W":"#16A34A","D":"#555","L":"#C84B31"};
+  const formBg={"W":"#f0fdf4","D":"#f5f5f5","L":"#fef2f2"};
   const rows=[
-    {label:"International baseline",desc:"Starting point for all established FIFA member nations",val:bd.b},
-    {label:"Recent form",desc:"Adjusted based on results in the 18 months prior to the tournament",val:bd.f},
-    {label:"Qualifying campaign",desc:"Performance during official 2026 World Cup qualifying matches",val:bd.q},
-    {label:"Tournament pedigree",desc:"Historical World Cup performance, titles, and deep runs",val:bd.p},
+    {key:"base",  label:"International baseline",  desc:"Starting point for all established FIFA member nations",val:bd.b, hover:null},
+    {key:"form",  label:"Recent form",              desc:"Adjusted based on results in the 18 months prior",       val:bd.f, hover:"form"},
+    {key:"qual",  label:"Qualifying campaign",      desc:"Performance during official 2026 World Cup qualifying",   val:bd.q, hover:"qual"},
+    {key:"pedi",  label:"Tournament pedigree",      desc:"Historical World Cup performance, titles, and deep runs", val:bd.p, hover:null},
   ];
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.6)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
-      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:460,boxShadow:"0 24px 64px rgba(0,0,0,0.22)",overflow:"hidden"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:480,boxShadow:"0 24px 64px rgba(0,0,0,0.22)",overflow:"hidden"}}>
+        {/* Header */}
         <div style={{background:T.redLight,padding:"18px 24px",borderBottom:`1px solid ${T.redMid}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{display:"flex",gap:12,alignItems:"center"}}>
             <Flag code={team.code} size={36}/>
             <div>
               <div style={{...H,fontSize:18,fontWeight:800,color:T.ink}}>{team.name}</div>
-              <div style={{...B,fontSize:12,color:T.muted}}>Ranked #{rank} of 48 qualified teams</div>
+              <div style={{...B,fontSize:12,color:T.muted}}>Ranked #{rank} by Elo · FIFA #{team.rank} (April 2026)</div>
             </div>
           </div>
           <div style={{textAlign:"right"}}>
@@ -387,26 +393,76 @@ function EloModal({team,onClose}){
             <div style={{...B,fontSize:10,color:T.faint}}>Elo rating</div>
           </div>
         </div>
-        <div style={{padding:"18px 24px"}}>
-          <div style={{...B,fontSize:13,color:T.muted,marginBottom:16,lineHeight:1.6}}>{bd.note}</div>
-          <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:10}}>Rating breakdown</div>
+        {/* Note */}
+        <div style={{padding:"14px 24px 0",...B,fontSize:13,color:T.muted,lineHeight:1.6}}>{bd.note}</div>
+        {/* Breakdown rows */}
+        <div style={{padding:"12px 24px 0"}}>
+          <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:8}}>Rating breakdown</div>
           {rows.map((r,i)=>(
-            <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i<rows.length-1?`1px solid ${T.border}`:"none",gap:16}}>
-              <div style={{flex:1}}>
-                <div style={{...B,fontSize:13,fontWeight:500,color:T.ink,marginBottom:2}}>{r.label}</div>
-                <div style={{...B,fontSize:11,color:T.faint}}>{r.desc}</div>
+            <div key={r.key}
+              onMouseEnter={()=>r.hover&&setHovered(r.key)}
+              onMouseLeave={()=>setHovered(null)}
+              style={{borderBottom:i<rows.length-1?`1px solid ${T.border}`:"none",cursor:r.hover?"pointer":"default"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",gap:16}}>
+                <div style={{flex:1}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
+                    <div style={{...B,fontSize:13,fontWeight:500,color:T.ink}}>{r.label}</div>
+                    {r.hover&&<span style={{...B,fontSize:10,color:T.faint,border:`1px solid ${T.border}`,borderRadius:3,padding:"1px 5px"}}>hover for detail</span>}
+                  </div>
+                  <div style={{...B,fontSize:11,color:T.faint}}>{r.desc}</div>
+                </div>
+                <div style={{...H,fontSize:15,fontWeight:700,color:r.val>0?T.red:r.val<0?"#2563EB":T.ink,minWidth:48,textAlign:"right",flexShrink:0}}>
+                  {r.val>0?"+":""}{r.val.toLocaleString()}
+                </div>
               </div>
-              <div style={{...H,fontSize:15,fontWeight:700,color:r.val>0?T.red:r.val<0?"#2563EB":T.ink,minWidth:48,textAlign:"right",flexShrink:0}}>
-                {r.val>0?"+":""}{r.val.toLocaleString()}
-              </div>
+              {/* Hover detail — Recent form */}
+              {r.hover==="form"&&hovered==="form"&&(
+                <div style={{paddingBottom:12}}>
+                  <div style={{...B,fontSize:11,color:T.faint,marginBottom:8}}>Last 5 matches (oldest → most recent)</div>
+                  <div style={{display:"flex",gap:8}}>
+                    {bd.form.map((res,j)=>(
+                      <div key={j} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+                        <div style={{width:36,height:36,borderRadius:8,background:formBg[res],border:`1px solid ${formColors[res]}33`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                          <span style={{...H,fontSize:14,fontWeight:800,color:formColors[res]}}>{res}</span>
+                        </div>
+                        <span style={{...B,fontSize:9,color:T.faint}}>{["5th","4th","3rd","2nd","Last"][j]}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{...B,fontSize:11,color:T.muted,marginTop:8}}>
+                    {bd.form.filter(r=>r==="W").length}W · {bd.form.filter(r=>r==="D").length}D · {bd.form.filter(r=>r==="L").length}L in last 5
+                  </div>
+                </div>
+              )}
+              {/* Hover detail — Qualifying */}
+              {r.hover==="qual"&&hovered==="qual"&&(
+                <div style={{paddingBottom:12}}>
+                  <div style={{...B,fontSize:11,color:T.faint,marginBottom:8}}>Official 2026 qualifying record</div>
+                  <div style={{display:"flex",gap:10}}>
+                    {[["W",bd.qW,"#16A34A","#f0fdf4"],["D",bd.qD,"#555","#f5f5f5"],["L",bd.qL,"#C84B31","#fef2f2"]].map(([lbl,val,col,bg])=>(
+                      <div key={lbl} style={{flex:1,background:bg,borderRadius:8,padding:"10px 8px",textAlign:"center",border:`1px solid ${col}22`}}>
+                        <div style={{...H,fontSize:22,fontWeight:800,color:col,lineHeight:1}}>{val}</div>
+                        <div style={{...B,fontSize:11,color:col,marginTop:3,fontWeight:600}}>{lbl==="W"?"Wins":lbl==="D"?"Draws":"Losses"}</div>
+                      </div>
+                    ))}
+                    <div style={{flex:1,background:T.bg,borderRadius:8,padding:"10px 8px",textAlign:"center",border:`1px solid ${T.border}`}}>
+                      <div style={{...H,fontSize:22,fontWeight:800,color:T.ink,lineHeight:1}}>{bd.qW+bd.qD+bd.qL}</div>
+                      <div style={{...B,fontSize:11,color:T.muted,marginTop:3,fontWeight:600}}>Played</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:14,padding:"12px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`}}>
+        </div>
+        {/* Total */}
+        <div style={{padding:"0 24px 16px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`}}>
             <div style={{...H,fontSize:14,fontWeight:700,color:T.ink}}>Total Elo Rating</div>
             <div style={{...H,fontSize:22,fontWeight:800,color:T.red}}>{team.elo}</div>
           </div>
-          <div style={{...B,fontSize:11,color:T.faint,marginTop:10,lineHeight:1.5}}>
-            A 200-point Elo gap between two teams translates to approximately a 76% win probability for the stronger side.
+          <div style={{...B,fontSize:11,color:T.faint,marginTop:8,lineHeight:1.5}}>
+            A 200-point Elo gap between two teams equals approx. 76% win probability for the stronger side.
           </div>
         </div>
         <div style={{padding:"0 24px 18px"}}>
@@ -415,7 +471,7 @@ function EloModal({team,onClose}){
       </div>
     </div>
   );
-}
+}}
 
 // ── VENUE MODAL ───────────────────────────────────────────────────────────────
 function VenueModal({venue,onClose}){
@@ -605,7 +661,7 @@ function TeamsSection(){
   const [conf,setConf]=useState("ALL");
   const [selected,setSelected]=useState(null);
   const [eloTeam,setEloTeam]=useState(null);
-  const filtered=TEAMS.filter(t=>(conf==="ALL"||t.conf===conf)&&t.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered=[...TEAMS].filter(t=>(conf==="ALL"||t.conf===conf)&&t.name.toLowerCase().includes(search.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));
 
   function SquadPanel({team}){
     const squad=SQUADS[team.name];
@@ -667,14 +723,19 @@ function TeamsSection(){
   filtered.forEach(t=>{
     items.push(
       <div key={t.name} onClick={()=>setSelected(selected?.name===t.name?null:t)}
-        style={{background:selected?.name===t.name?T.redLight:T.surface,border:`1px solid ${selected?.name===t.name?T.red:T.border}`,borderRadius:12,padding:"14px 14px",cursor:"pointer",transition:"all .15s"}}>
-        <div style={{marginBottom:8}}><Flag code={t.code} size={34}/></div>
-        <div style={{...H,fontSize:13,fontWeight:700,color:T.ink,marginBottom:6,lineHeight:1.2}}>{t.name}</div>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:4}}>
-          <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
+        style={{background:selected?.name===t.name?T.redLight:T.surface,border:`1px solid ${selected?.name===t.name?T.red:T.border}`,borderRadius:12,padding:"14px 14px",cursor:"pointer",transition:"all .15s",position:"relative"}}>
+        {/* Flag — top right */}
+        <div style={{position:"absolute",top:12,right:12}}>
+          <Flag code={t.code} size={28}/>
+        </div>
+        {/* Content */}
+        <div style={{...H,fontSize:13,fontWeight:700,color:T.ink,marginBottom:5,lineHeight:1.2,paddingRight:36}}>{t.name}</div>
+        <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
+        <div style={{display:"flex",gap:12,alignItems:"center",marginTop:8,flexWrap:"wrap"}}>
           <button onClick={e=>{e.stopPropagation();setEloTeam(t);}} style={{...B,fontSize:10,color:T.red,background:"none",border:"none",cursor:"pointer",padding:0,fontWeight:600,textDecoration:"underline dotted",textUnderlineOffset:2}}>
             Elo: {t.elo}
           </button>
+          <span style={{...B,fontSize:10,color:T.faint}}>FIFA #{t.rank}</span>
         </div>
         {SQUADS[t.name]&&<div style={{...B,fontSize:10,color:T.red,fontWeight:500,marginTop:6}}>Squad available ↓</div>}
       </div>
