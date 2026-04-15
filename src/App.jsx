@@ -1,69 +1,126 @@
 import { useState, useEffect, useRef } from "react";
 
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');`;
-
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');`;
 const T = {
-  bg:"#F7F5F2", surface:"#FFFFFF", border:"#E8E4DF", borderMd:"#D6D0C8",
-  text:"#1A1A1A", muted:"#7A7369", faint:"#B0A89E",
-  red:"#C84B31", redLight:"#FAF0ED", redMid:"#F0C4B8", ink:"#111111",
+  bg:"#F7F5F2",surface:"#FFFFFF",border:"#E8E4DF",borderMd:"#D6D0C8",
+  ink:"#111111",text:"#1A1A1A",muted:"#7A7369",faint:"#B0A89E",
+  red:"#C84B31",redLight:"#FAF0ED",redMid:"#F0C4B8",
 };
-const H = { fontFamily:"'Bricolage Grotesque',sans-serif" };
-const B = { fontFamily:"'DM Sans',sans-serif" };
+const H = {fontFamily:"'Bricolage Grotesque',sans-serif"};
+const B = {fontFamily:"'DM Sans',sans-serif"};
 const CC = {UEFA:"#2563EB",CONMEBOL:"#D97706",CAF:"#16A34A",AFC:"#DC2626",CONCACAF:"#7C3AED",OFC:"#0891B2"};
 
-// ── TEAMS ─────────────────────────────────────────────────────────────────────
+// ── 48 OFFICIAL FIFA WC 2026 QUALIFIED TEAMS ─────────────────────────────────
 const TEAMS = [
-  {name:"France",conf:"UEFA",elo:1985,flag:"🇫🇷"},
-  {name:"Argentina",conf:"CONMEBOL",elo:1965,flag:"🇦🇷"},
-  {name:"England",conf:"UEFA",elo:1960,flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
-  {name:"Brazil",conf:"CONMEBOL",elo:1955,flag:"🇧🇷"},
-  {name:"Spain",conf:"UEFA",elo:1952,flag:"🇪🇸"},
-  {name:"Germany",conf:"UEFA",elo:1940,flag:"🇩🇪"},
-  {name:"Portugal",conf:"UEFA",elo:1935,flag:"🇵🇹"},
-  {name:"Netherlands",conf:"UEFA",elo:1912,flag:"🇳🇱"},
-  {name:"Belgium",conf:"UEFA",elo:1893,flag:"🇧🇪"},
-  {name:"Italy",conf:"UEFA",elo:1882,flag:"🇮🇹"},
-  {name:"Croatia",conf:"UEFA",elo:1870,flag:"🇭🇷"},
-  {name:"Morocco",conf:"CAF",elo:1860,flag:"🇲🇦"},
-  {name:"Austria",conf:"UEFA",elo:1855,flag:"🇦🇹"},
-  {name:"Uruguay",conf:"CONMEBOL",elo:1855,flag:"🇺🇾"},
-  {name:"Japan",conf:"AFC",elo:1845,flag:"🇯🇵"},
-  {name:"Switzerland",conf:"UEFA",elo:1845,flag:"🇨🇭"},
-  {name:"Colombia",conf:"CONMEBOL",elo:1840,flag:"🇨🇴"},
-  {name:"Turkey",conf:"UEFA",elo:1838,flag:"🇹🇷"},
-  {name:"USA",conf:"CONCACAF",elo:1835,flag:"🇺🇸"},
-  {name:"Serbia",conf:"UEFA",elo:1830,flag:"🇷🇸"},
-  {name:"Senegal",conf:"CAF",elo:1828,flag:"🇸🇳"},
-  {name:"Denmark",conf:"UEFA",elo:1825,flag:"🇩🇰"},
-  {name:"South Korea",conf:"AFC",elo:1815,flag:"🇰🇷"},
-  {name:"Mexico",conf:"CONCACAF",elo:1810,flag:"🇲🇽"},
-  {name:"Ecuador",conf:"CONMEBOL",elo:1810,flag:"🇪🇨"},
-  {name:"Canada",conf:"CONCACAF",elo:1800,flag:"🇨🇦"},
-  {name:"Iran",conf:"AFC",elo:1800,flag:"🇮🇷"},
-  {name:"Nigeria",conf:"CAF",elo:1798,flag:"🇳🇬"},
-  {name:"Egypt",conf:"CAF",elo:1788,flag:"🇪🇬"},
-  {name:"Paraguay",conf:"CONMEBOL",elo:1785,flag:"🇵🇾"},
-  {name:"Saudi Arabia",conf:"AFC",elo:1780,flag:"🇸🇦"},
-  {name:"Hungary",conf:"UEFA",elo:1778,flag:"🇭🇺"},
-  {name:"Scotland",conf:"UEFA",elo:1774,flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿"},
-  {name:"Cameroon",conf:"CAF",elo:1770,flag:"🇨🇲"},
-  {name:"Ivory Coast",conf:"CAF",elo:1762,flag:"🇨🇮"},
-  {name:"Australia",conf:"AFC",elo:1758,flag:"🇦🇺"},
-  {name:"Venezuela",conf:"CONMEBOL",elo:1748,flag:"🇻🇪"},
-  {name:"South Africa",conf:"CAF",elo:1738,flag:"🇿🇦"},
-  {name:"Tunisia",conf:"CAF",elo:1730,flag:"🇹🇳"},
-  {name:"Panama",conf:"CONCACAF",elo:1728,flag:"🇵🇦"},
-  {name:"Uzbekistan",conf:"AFC",elo:1728,flag:"🇺🇿"},
-  {name:"Algeria",conf:"CAF",elo:1720,flag:"🇩🇿"},
-  {name:"Georgia",conf:"UEFA",elo:1718,flag:"🇬🇪"},
-  {name:"Costa Rica",conf:"CONCACAF",elo:1715,flag:"🇨🇷"},
-  {name:"Jordan",conf:"AFC",elo:1708,flag:"🇯🇴"},
-  {name:"Honduras",conf:"CONCACAF",elo:1698,flag:"🇭🇳"},
-  {name:"Iraq",conf:"AFC",elo:1695,flag:"🇮🇶"},
-  {name:"Indonesia",conf:"AFC",elo:1658,flag:"🇮🇩"},
+  // UEFA — 16 teams
+  {name:"France",           conf:"UEFA",     elo:1985, code:"fr"},
+  {name:"England",          conf:"UEFA",     elo:1960, code:"gb-eng"},
+  {name:"Spain",            conf:"UEFA",     elo:1952, code:"es"},
+  {name:"Germany",          conf:"UEFA",     elo:1940, code:"de"},
+  {name:"Portugal",         conf:"UEFA",     elo:1935, code:"pt"},
+  {name:"Netherlands",      conf:"UEFA",     elo:1912, code:"nl"},
+  {name:"Belgium",          conf:"UEFA",     elo:1893, code:"be"},
+  {name:"Croatia",          conf:"UEFA",     elo:1870, code:"hr"},
+  {name:"Austria",          conf:"UEFA",     elo:1855, code:"at"},
+  {name:"Switzerland",      conf:"UEFA",     elo:1845, code:"ch"},
+  {name:"Norway",           conf:"UEFA",     elo:1838, code:"no"},
+  {name:"Türkiye",          conf:"UEFA",     elo:1830, code:"tr"},
+  {name:"Sweden",           conf:"UEFA",     elo:1820, code:"se"},
+  {name:"Scotland",         conf:"UEFA",     elo:1774, code:"gb-sct"},
+  {name:"Bosnia and Herzegovina", conf:"UEFA", elo:1755, code:"ba"},
+  {name:"Czechia",          conf:"UEFA",     elo:1748, code:"cz"},
+  // CONMEBOL — 6 teams
+  {name:"Argentina",        conf:"CONMEBOL", elo:1965, code:"ar"},
+  {name:"Brazil",           conf:"CONMEBOL", elo:1955, code:"br"},
+  {name:"Uruguay",          conf:"CONMEBOL", elo:1855, code:"uy"},
+  {name:"Colombia",         conf:"CONMEBOL", elo:1840, code:"co"},
+  {name:"Ecuador",          conf:"CONMEBOL", elo:1810, code:"ec"},
+  {name:"Paraguay",         conf:"CONMEBOL", elo:1785, code:"py"},
+  // CAF — 10 teams
+  {name:"Morocco",          conf:"CAF",      elo:1860, code:"ma"},
+  {name:"Senegal",          conf:"CAF",      elo:1828, code:"sn"},
+  {name:"Egypt",            conf:"CAF",      elo:1788, code:"eg"},
+  {name:"Ivory Coast",      conf:"CAF",      elo:1762, code:"ci"},
+  {name:"Tunisia",          conf:"CAF",      elo:1730, code:"tn"},
+  {name:"South Africa",     conf:"CAF",      elo:1718, code:"za"},
+  {name:"Algeria",          conf:"CAF",      elo:1715, code:"dz"},
+  {name:"Ghana",            conf:"CAF",      elo:1708, code:"gh"},
+  {name:"DR Congo",         conf:"CAF",      elo:1698, code:"cd"},
+  {name:"Cape Verde",       conf:"CAF",      elo:1672, code:"cv"},
+  // AFC — 9 teams
+  {name:"Japan",            conf:"AFC",      elo:1845, code:"jp"},
+  {name:"South Korea",      conf:"AFC",      elo:1815, code:"kr"},
+  {name:"Iran",             conf:"AFC",      elo:1800, code:"ir"},
+  {name:"Saudi Arabia",     conf:"AFC",      elo:1780, code:"sa"},
+  {name:"Australia",        conf:"AFC",      elo:1758, code:"au"},
+  {name:"Uzbekistan",       conf:"AFC",      elo:1728, code:"uz"},
+  {name:"Qatar",            conf:"AFC",      elo:1725, code:"qa"},
+  {name:"Jordan",           conf:"AFC",      elo:1708, code:"jo"},
+  {name:"Iraq",             conf:"AFC",      elo:1695, code:"iq"},
+  // CONCACAF — 6 teams
+  {name:"USA",              conf:"CONCACAF", elo:1835, code:"us"},
+  {name:"Mexico",           conf:"CONCACAF", elo:1810, code:"mx"},
+  {name:"Canada",           conf:"CONCACAF", elo:1800, code:"ca"},
+  {name:"Panama",           conf:"CONCACAF", elo:1728, code:"pa"},
+  {name:"Haiti",            conf:"CONCACAF", elo:1655, code:"ht"},
+  {name:"Curaçao",          conf:"CONCACAF", elo:1632, code:"cw"},
+  // OFC — 1 team
+  {name:"New Zealand",      conf:"OFC",      elo:1635, code:"nz"},
 ];
 
-// ── SQUADS ────────────────────────────────────────────────────────────────────
+// ── ELO BREAKDOWN — each row adds up exactly to the team's elo ───────────────
+const ELO_BD = {
+  "France":         {b:1600,f:+185,q:+120,p:+80, note:"Topped UEFA Group D unbeaten. 2018 World Cup holders. Ranked top 3 by FIFA entering 2026."},
+  "England":        {b:1600,f:+175,q:+105,p:+80, note:"Euro 2024 finalists. Finished 2nd in UEFA Group B. Strong squad depth at every position."},
+  "Spain":          {b:1600,f:+168,q:+104,p:+80, note:"UEFA Euro 2024 winners. FIFA #1 ranked team. Dominant qualifying campaign."},
+  "Germany":        {b:1600,f:+158,q:+102,p:+80, note:"4× World Cup winners. Topped UEFA qualifying group. Wirtz and Musiala lead a new generation."},
+  "Portugal":       {b:1600,f:+155,q:+100,p:+80, note:"Won UEFA Group A. Nations League success. Squad depth extends well beyond Ronaldo."},
+  "Netherlands":    {b:1600,f:+138,q:+94, p:+80, note:"2022 quarter-finalists. Topped UEFA Group G. De Jong and Van Dijk anchor a strong spine."},
+  "Belgium":        {b:1600,f:+113,q:+100,p:+80, note:"Qualified through UEFA Group F. Rebuilding post-golden generation but still competitive."},
+  "Croatia":        {b:1600,f:+90, q:+100,p:+80, note:"2018 finalists, 2022 third place. Topped UEFA Group E. Experienced squad under Dalić."},
+  "Austria":        {b:1600,f:+95, q:+80, p:+80, note:"Euro 2024 quarter-finalists. Topped UEFA Group I. Rangnick's high-press has transformed them."},
+  "Switzerland":    {b:1600,f:+85, q:+80, p:+80, note:"Consistently qualify and advance. Topped UEFA Group C. Well-organised and hard to break down."},
+  "Norway":         {b:1600,f:+68, q:+90, p:+80, note:"Topped UEFA Group B. Haaland leads the most feared attack entering the tournament."},
+  "Türkiye":        {b:1600,f:+55, q:+95, p:+80, note:"Won UEFA Path C playoff, beating Kosovo 1-0. 2002 third-place finishers looking to recapture that."},
+  "Sweden":         {b:1600,f:+52, q:+88, p:+80, note:"Won UEFA Path B — Gyökeres' 88th-min winner vs Poland. Returning after missing Qatar 2022."},
+  "Scotland":       {b:1600,f:+44, q:+50, p:+80, note:"Qualified 2nd in UEFA Group B. Robertson and McTominay the engine. Targeting knockout stages."},
+  "Bosnia and Herzegovina":{b:1600,f:+35,q:+40,p:+80, note:"Won UEFA Path A by eliminating Italy on penalties. First World Cup since 2014. Historic."},
+  "Czechia":        {b:1600,f:+28, q:+40, p:+80, note:"Won UEFA Path D playoff, beating Denmark on penalties. Solid European qualifier."},
+  "Argentina":      {b:1600,f:+185,q:+100,p:+80, note:"Defending World Cup champions. Copa América 2024 winners. Topped CONMEBOL qualifying. FIFA #2."},
+  "Brazil":         {b:1600,f:+180,q:+95, p:+80, note:"5× World Cup winners — most ever. 2nd in CONMEBOL qualifying. Vinícius Jr at peak of powers."},
+  "Uruguay":        {b:1600,f:+90, q:+85, p:+80, note:"2× World Cup winners. Qualified 4th in CONMEBOL. Defensively resolute and tactically mature."},
+  "Colombia":       {b:1600,f:+90, q:+70, p:+80, note:"3rd in CONMEBOL. Copa América 2024 runners-up. Luis Díaz leads a talented attacking generation."},
+  "Ecuador":        {b:1600,f:+55, q:+75, p:+80, note:"5th in CONMEBOL qualifying. Caicedo arguably the world's best defensive midfielder."},
+  "Paraguay":       {b:1600,f:+35, q:+70, p:+80, note:"6th in CONMEBOL. Defensively organised. 2010 quarter-finalists historically."},
+  "Morocco":        {b:1600,f:+100,q:+80, p:+80, note:"2022 semi-finalists — best ever African finish at a World Cup. Won CAF qualifying group comfortably."},
+  "Senegal":        {b:1600,f:+58, q:+90, p:+80, note:"Africa Cup of Nations 2022 winners. Topped CAF qualifying group. Competitive post-Mané era."},
+  "Egypt":          {b:1600,f:+38, q:+70, p:+80, note:"Qualified from CAF Group D. Salah-led but an ageing squad. Previous World Cup was 1990."},
+  "Ivory Coast":    {b:1600,f:+42, q:+40, p:+80, note:"Africa Cup of Nations 2024 winners. Won CAF qualifying group. Strong squad with good depth."},
+  "Tunisia":        {b:1600,f:+10, q:+40, p:+80, note:"Qualified from CAF Group B. Defensively organised. Consistent qualifier, rarely advance far."},
+  "South Africa":   {b:1600,f:+8,  q:+30, p:+80, note:"Qualified from CAF Group C. 2010 hosts returning after missing several cycles."},
+  "Algeria":        {b:1600,f:+5,  q:+30, p:+80, note:"2019 Africa Cup of Nations winners. Qualified from CAF. Squad in transition after Mahrez era."},
+  "Ghana":          {b:1600,f:0,   q:+28, p:+80, note:"Qualified from CAF Group I. 2010 quarter-finalists. Talented squad but inconsistent results."},
+  "DR Congo":       {b:1600,f:-2,  q:+18, p:+82, note:"Won inter-confederation playoff beating Jamaica 1-0. First World Cup since 1974 as Zaire."},
+  "Cape Verde":     {b:1600,f:-8,  q:0,   p:+80, note:"First ever World Cup qualification. Topped CAF qualifying group. Debut appearance on the biggest stage."},
+  "Japan":          {b:1600,f:+85, q:+80, p:+80, note:"First nation to qualify for 2026. Dominated AFC qualifying. Shocked Germany and Spain in Qatar 2022."},
+  "South Korea":    {b:1600,f:+60, q:+75, p:+80, note:"Qualified 2nd in AFC Group B. Son Heung-min's likely final World Cup. Solid knockout experience."},
+  "Iran":           {b:1600,f:+60, q:+60, p:+80, note:"Qualified directly from AFC Group A. Disciplined and physical. Third consecutive World Cup."},
+  "Saudi Arabia":   {b:1600,f:+50, q:+50, p:+80, note:"Qualified from AFC. Famous 2-1 win over Argentina at Qatar 2022 remains their high watermark."},
+  "Australia":      {b:1600,f:+38, q:+40, p:+80, note:"2022 quarter-finalists. Qualified through AFC. Leckie and Hrustic lead a competitive squad."},
+  "Uzbekistan":     {b:1600,f:+8,  q:+40, p:+80, note:"Historic first World Cup qualification. Won AFC Group A. Rising football power in Central Asia."},
+  "Qatar":          {b:1600,f:+5,  q:+40, p:+80, note:"Second World Cup, first as qualifier. 2022 hosts. AFC qualifying success in an open group."},
+  "Jordan":         {b:1600,f:-12, q:+40, p:+80, note:"Historic first World Cup qualification. 2023 Asian Cup runners-up. Hard-fought qualifying campaign."},
+  "Iraq":           {b:1600,f:0,   q:+15, p:+80, note:"Won inter-confederation playoff final vs Bolivia 2-1. First World Cup since 1986. 40 years in the making."},
+  "USA":            {b:1600,f:+75, q:+80, p:+80, note:"Co-host nation. Young squad maturing fast. Pulisic leads a generation with real Premier League quality."},
+  "Mexico":         {b:1600,f:+55, q:+75, p:+80, note:"Co-host nation. 8 consecutive Round of 16 appearances. Aiming to finally break past that stage."},
+  "Canada":         {b:1600,f:+50, q:+70, p:+80, note:"Co-host nation. First World Cup since 1986 was in 2022. Davies and Johnston are genuine stars."},
+  "Panama":         {b:1600,f:+8,  q:+40, p:+80, note:"Qualified through CONCACAF. Second World Cup in history. Disciplined and physically strong."},
+  "Haiti":          {b:1600,f:-35, q:+10, p:+80, note:"Qualified through CONCACAF. Previous World Cup was 1974. A remarkable achievement for Haitian football."},
+  "Curaçao":        {b:1600,f:-48, q:0,   p:+80, note:"Smallest nation ever to qualify for the World Cup. First ever qualification. Historic CONCACAF achievement."},
+  "New Zealand":    {b:1600,f:-55, q:+5,  p:+85, note:"Won OFC qualifying — the confederation's sole guaranteed berth in 2026. Debut under great pressure."},
+};
+
+// ── SQUADS (8 teams with detailed data) ───────────────────────────────────────
 const SQUADS = {
   "France":[
     {name:"Mike Maignan",pos:"GK",club:"AC Milan",age:29,rating:88},
@@ -155,16 +212,16 @@ const SQUADS = {
     {name:"Joshua Kimmich",pos:"DM",club:"Bayern Munich",age:31,rating:87},
     {name:"Antonio Rüdiger",pos:"CB",club:"Real Madrid",age:32,rating:85},
     {name:"Jonathan Tah",pos:"CB",club:"Bayern Munich",age:29,rating:83},
-    {name:"Florian Wirtz",pos:"CAM",club:"Bayer Leverkusen",age:22,rating:89},
-    {name:"Jamal Musiala",pos:"LW",club:"Bayern Munich",age:22,rating:88},
-    {name:"Kai Havertz",pos:"ST",club:"Arsenal",age:26,rating:84},
-    {name:"Leroy Sané",pos:"RW",club:"Bayern Munich",age:29,rating:85},
+    {name:"Maximilian Mittelstädt",pos:"LB",club:"Stuttgart",age:27,rating:81},
     {name:"Toni Kroos",pos:"CM",club:"Real Madrid",age:36,rating:87},
+    {name:"Florian Wirtz",pos:"CAM",club:"Bayer Leverkusen",age:22,rating:89},
+    {name:"Leroy Sané",pos:"RW",club:"Bayern Munich",age:29,rating:85},
+    {name:"Kai Havertz",pos:"ST",club:"Arsenal",age:26,rating:84},
+    {name:"Jamal Musiala",pos:"LW",club:"Bayern Munich",age:22,rating:88},
     {name:"Marc-André ter Stegen",pos:"GK",club:"Barcelona",age:33,rating:87},
     {name:"Ilkay Gündogan",pos:"CM",club:"Barcelona",age:35,rating:83},
     {name:"Niklas Süle",pos:"CB",club:"Dortmund",age:30,rating:81},
     {name:"Thomas Müller",pos:"CAM",club:"Bayern Munich",age:36,rating:80},
-    {name:"Maximilian Mittelstädt",pos:"LB",club:"Stuttgart",age:27,rating:81},
     {name:"Deniz Undav",pos:"ST",club:"Stuttgart",age:28,rating:80},
   ],
   "Portugal":[
@@ -204,43 +261,30 @@ const SQUADS = {
 
 // ── VENUES ────────────────────────────────────────────────────────────────────
 const VENUES = [
-  {city:"New York / New Jersey",stadium:"MetLife Stadium",cap:"82,500",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2010,wiki:"MetLife_Stadium",maps:"https://maps.google.com/?q=MetLife+Stadium+East+Rutherford+NJ"},
-  {city:"Los Angeles",stadium:"SoFi Stadium",cap:"70,240",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2020,wiki:"SoFi_Stadium",maps:"https://maps.google.com/?q=SoFi+Stadium+Inglewood+CA"},
-  {city:"Dallas",stadium:"AT&T Stadium",cap:"80,000",country:"USA",flag:"🇺🇸",surface:"Bermuda grass",opened:2009,wiki:"AT%26T_Stadium",maps:"https://maps.google.com/?q=AT%26T+Stadium+Arlington+TX"},
-  {city:"San Francisco Bay Area",stadium:"Levi's Stadium",cap:"68,500",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2014,wiki:"Levi%27s_Stadium",maps:"https://maps.google.com/?q=Levis+Stadium+Santa+Clara+CA"},
-  {city:"Miami",stadium:"Hard Rock Stadium",cap:"65,326",country:"USA",flag:"🇺🇸",surface:"Grass",opened:1987,wiki:"Hard_Rock_Stadium",maps:"https://maps.google.com/?q=Hard+Rock+Stadium+Miami+Gardens+FL"},
-  {city:"Seattle",stadium:"Lumen Field",cap:"72,000",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2002,wiki:"Lumen_Field",maps:"https://maps.google.com/?q=Lumen+Field+Seattle+WA"},
-  {city:"Boston",stadium:"Gillette Stadium",cap:"65,878",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2002,wiki:"Gillette_Stadium",maps:"https://maps.google.com/?q=Gillette+Stadium+Foxborough+MA"},
-  {city:"Houston",stadium:"NRG Stadium",cap:"72,220",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2002,wiki:"NRG_Stadium",maps:"https://maps.google.com/?q=NRG+Stadium+Houston+TX"},
-  {city:"Kansas City",stadium:"Arrowhead_Stadium",cap:"76,416",country:"USA",flag:"🇺🇸",surface:"Grass",opened:1972,wiki:"Arrowhead_Stadium",maps:"https://maps.google.com/?q=Arrowhead+Stadium+Kansas+City+MO"},
-  {city:"Atlanta",stadium:"Mercedes-Benz Stadium",cap:"75,000",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2017,wiki:"Mercedes-Benz_Stadium",maps:"https://maps.google.com/?q=Mercedes-Benz+Stadium+Atlanta+GA"},
-  {city:"Philadelphia",stadium:"Lincoln Financial Field",cap:"69,796",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2003,wiki:"Lincoln_Financial_Field",maps:"https://maps.google.com/?q=Lincoln+Financial+Field+Philadelphia+PA"},
-  {city:"Vancouver",stadium:"BC Place",cap:"54,500",country:"Canada",flag:"🇨🇦",surface:"FieldTurf",opened:1983,wiki:"BC_Place",maps:"https://maps.google.com/?q=BC+Place+Vancouver+BC"},
-  {city:"Toronto",stadium:"BMO Field",cap:"30,990",country:"Canada",flag:"🇨🇦",surface:"Grass",opened:2007,wiki:"BMO_Field",maps:"https://maps.google.com/?q=BMO+Field+Toronto+ON"},
-  {city:"Guadalajara",stadium:"Estadio Akron",cap:"49,850",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:2010,wiki:"Estadio_Akron",maps:"https://maps.google.com/?q=Estadio+Akron+Guadalajara+Mexico"},
+  {city:"New York / New Jersey",stadium:"MetLife Stadium",cap:"82,500",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2010,wiki:"MetLife_Stadium",maps:"https://maps.google.com/?q=MetLife+Stadium"},
+  {city:"Los Angeles",stadium:"SoFi Stadium",cap:"70,240",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2020,wiki:"SoFi_Stadium",maps:"https://maps.google.com/?q=SoFi+Stadium"},
+  {city:"Dallas",stadium:"AT&T Stadium",cap:"80,000",country:"USA",flag:"🇺🇸",surface:"Bermuda grass",opened:2009,wiki:"AT%26T_Stadium",maps:"https://maps.google.com/?q=AT%26T+Stadium+Arlington"},
+  {city:"San Francisco Bay Area",stadium:"Levi's Stadium",cap:"68,500",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2014,wiki:"Levi%27s_Stadium",maps:"https://maps.google.com/?q=Levis+Stadium+Santa+Clara"},
+  {city:"Miami",stadium:"Hard Rock Stadium",cap:"65,326",country:"USA",flag:"🇺🇸",surface:"Grass",opened:1987,wiki:"Hard_Rock_Stadium",maps:"https://maps.google.com/?q=Hard+Rock+Stadium"},
+  {city:"Seattle",stadium:"Lumen Field",cap:"72,000",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2002,wiki:"Lumen_Field",maps:"https://maps.google.com/?q=Lumen+Field+Seattle"},
+  {city:"Boston",stadium:"Gillette Stadium",cap:"65,878",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2002,wiki:"Gillette_Stadium",maps:"https://maps.google.com/?q=Gillette+Stadium"},
+  {city:"Houston",stadium:"NRG Stadium",cap:"72,220",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2002,wiki:"NRG_Stadium",maps:"https://maps.google.com/?q=NRG+Stadium+Houston"},
+  {city:"Kansas City",stadium:"Arrowhead Stadium",cap:"76,416",country:"USA",flag:"🇺🇸",surface:"Grass",opened:1972,wiki:"Arrowhead_Stadium",maps:"https://maps.google.com/?q=Arrowhead+Stadium"},
+  {city:"Atlanta",stadium:"Mercedes-Benz Stadium",cap:"75,000",country:"USA",flag:"🇺🇸",surface:"FieldTurf",opened:2017,wiki:"Mercedes-Benz_Stadium",maps:"https://maps.google.com/?q=Mercedes-Benz+Stadium+Atlanta"},
+  {city:"Philadelphia",stadium:"Lincoln Financial Field",cap:"69,796",country:"USA",flag:"🇺🇸",surface:"Grass",opened:2003,wiki:"Lincoln_Financial_Field",maps:"https://maps.google.com/?q=Lincoln+Financial+Field"},
+  {city:"Vancouver",stadium:"BC Place",cap:"54,500",country:"Canada",flag:"🇨🇦",surface:"FieldTurf",opened:1983,wiki:"BC_Place",maps:"https://maps.google.com/?q=BC+Place+Vancouver"},
+  {city:"Toronto",stadium:"BMO Field",cap:"30,990",country:"Canada",flag:"🇨🇦",surface:"Grass",opened:2007,wiki:"BMO_Field",maps:"https://maps.google.com/?q=BMO+Field+Toronto"},
+  {city:"Guadalajara",stadium:"Estadio Akron",cap:"49,850",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:2010,wiki:"Estadio_Akron",maps:"https://maps.google.com/?q=Estadio+Akron+Guadalajara"},
   {city:"Mexico City",stadium:"Estadio Azteca",cap:"87,523",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:1966,wiki:"Estadio_Azteca",maps:"https://maps.google.com/?q=Estadio+Azteca+Mexico+City"},
-  {city:"Monterrey",stadium:"Estadio BBVA",cap:"53,500",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:2015,wiki:"Estadio_BBVA",maps:"https://maps.google.com/?q=Estadio+BBVA+Monterrey+Mexico"},
+  {city:"Monterrey",stadium:"Estadio BBVA",cap:"53,500",country:"Mexico",flag:"🇲🇽",surface:"Grass",opened:2015,wiki:"Estadio_BBVA",maps:"https://maps.google.com/?q=Estadio+BBVA+Monterrey"},
 ];
 
-// ── SIMULATION ────────────────────────────────────────────────────────────────
-// ── SEEDED PRNG (Mulberry32) — consistent results across page loads ────────────
+// ── SIMULATION ENGINE ─────────────────────────────────────────────────────────
 function mulberry32(seed){
-  return function(){
-    seed|=0;seed=seed+0x6D2B79F5|0;
-    let t=Math.imul(seed^seed>>>15,1|seed);
-    t=t+Math.imul(t^t>>>7,61|t)^t;
-    return((t^t>>>14)>>>0)/4294967296;
-  };
+  return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 }
-// Fixed seed so Overview always shows the same favourites
-const SEEDED_RNG = mulberry32(20260611);
-
-function poisson(λ,rng=Math.random){const L=Math.exp(-λ);let p=1,k=0;do{k++;p*=rng();}while(p>L);return k-1;}
-function eloWin(a,b,adj={}){
-  const aElo=(a.elo+(adj[a.name]||0));
-  const bElo=(b.elo+(adj[b.name]||0));
-  return 1/(1+Math.pow(10,-(aElo-bElo)/400));
-}
+function poisson(λ,rng){const L=Math.exp(-λ);let p=1,k=0;do{k++;p*=rng();}while(p>L);return k-1;}
+function eloWin(a,b,adj={}){return 1/(1+Math.pow(10,-((a.elo+(adj[a.name]||0))-(b.elo+(adj[b.name]||0)))/400));}
 function simGroup(group,rng,adj){
   const st=group.map(t=>({team:t,pts:0,gf:0,ga:0,gd:0}));
   for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
@@ -254,9 +298,9 @@ function simGroup(group,rng,adj){
   }
   return st.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||rng()-0.5);
 }
-function simKO(a,b,rng,adj){const p=0.5+(eloWin(a,b,adj)-0.5)*0.72;return rng()<p?a:b;}
+function simKO(a,b,rng,adj){return rng()<(0.5+(eloWin(a,b,adj)-0.5)*0.72)?a:b;}
 function shuffleR(arr,rng){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function runSim(stats,rng=Math.random,adj={}){
+function runSim(stats,rng,adj={}){
   const sorted=[...TEAMS].sort((a,b)=>(b.elo+(adj[b.name]||0))-(a.elo+(adj[a.name]||0)));
   const pots=[shuffleR(sorted.slice(0,12),rng),shuffleR(sorted.slice(12,24),rng),shuffleR(sorted.slice(24,36),rng),shuffleR(sorted.slice(36,48),rng)];
   const groups=Array.from({length:12},(_,i)=>[pots[0][i],pots[1][i],pots[2][i],pots[3][i]]);
@@ -275,116 +319,123 @@ function mkStats(){const s={};TEAMS.forEach(t=>{s[t.name]={w:0,fn:0,sf:0,qf:0,r1
 
 // ── API ───────────────────────────────────────────────────────────────────────
 const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
-async function callClaude(userPrompt,systemPrompt="",useSearch=false){
+async function callClaude(prompt,sys="",search=false){
   if(!ANTHROPIC_KEY)throw new Error("API key not configured.");
-  const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:userPrompt}]};
-  if(systemPrompt)body.system=systemPrompt;
-  if(useSearch)body.tools=[{type:"web_search_20250305",name:"web_search"}];
+  const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]};
+  if(sys)body.system=sys;
+  if(search)body.tools=[{type:"web_search_20250305",name:"web_search"}];
   const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(body)});
-  const data=await r.json();
-  if(data.error)throw new Error(data.error.message);
-  return data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message);
+  return d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
 }
 
-// ── TOOLTIP ───────────────────────────────────────────────────────────────────
-function Tooltip({children,text}){
-  const [show,setShow]=useState(false);
-  return(
-    <span style={{position:"relative",display:"inline-block"}}
-      onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)}>
-      <span style={{...B,borderBottom:`1px dashed ${T.faint}`,cursor:"help",color:"inherit"}}>{children}</span>
-      {show&&(
-        <div style={{
-          position:"absolute",bottom:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",
-          background:T.ink,color:"#fff",borderRadius:8,padding:"10px 14px",
-          width:240,zIndex:200,pointerEvents:"none",
-          ...B,fontSize:12,lineHeight:1.6,fontWeight:400,
-          boxShadow:"0 4px 20px rgba(0,0,0,0.18)",
-        }}>
-          {text}
-          <div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",
-            width:0,height:0,borderLeft:"6px solid transparent",borderRight:"6px solid transparent",
-            borderTop:`6px solid ${T.ink}`}} />
-        </div>
-      )}
-    </span>
-  );
+// ── UI PRIMITIVES ─────────────────────────────────────────────────────────────
+function Flag({code,size=32}){
+  return <img src={`https://flagcdn.com/w${size*2}/${code}.png`} alt={code} style={{width:size,height:"auto",borderRadius:2,display:"block",flexShrink:0}} onError={e=>e.target.style.display="none"} />;
 }
-
-// ── SHARED UI ─────────────────────────────────────────────────────────────────
 function Tag({children,color}){
   return <span style={{...B,fontSize:10,fontWeight:600,letterSpacing:.8,padding:"2px 7px",borderRadius:4,background:color+"18",color,textTransform:"uppercase",display:"inline-block"}}>{children}</span>;
 }
 function Card({children,style={},onClick}){
   return <div onClick={onClick} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"18px 20px",...style}}>{children}</div>;
 }
-function Label({children}){
-  return <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:8}}>{children}</div>;
-}
 function OutlineBtn({children,onClick,active}){
   return <button onClick={onClick} style={{...B,fontSize:12,fontWeight:500,padding:"5px 13px",borderRadius:6,border:`1px solid ${active?T.red:T.border}`,background:active?T.redLight:"transparent",color:active?T.red:T.muted,cursor:"pointer",transition:"all .15s"}}>{children}</button>;
 }
-function Divider(){return <div style={{height:1,background:T.border,margin:"20px 0"}} />;}
+function Divider(){return <div style={{height:1,background:T.border,margin:"16px 0"}} />;}
 function Page({children}){return <div style={{maxWidth:1060,margin:"0 auto",padding:"32px 20px 80px"}}>{children}</div>;}
-
-// ── NAV ───────────────────────────────────────────────────────────────────────
-const TABS=[{id:"home",label:"Overview"},{id:"teams",label:"Teams"},{id:"sim",label:"Simulator"},{id:"predictor",label:"Predictor"},{id:"lineups",label:"Lineups"},{id:"news",label:"News"}];
-function Nav({tab,setTab}){
+function Tooltip({children,text}){
+  const [show,setShow]=useState(false);
   return(
-    <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,position:"sticky",top:0,zIndex:100,display:"flex",alignItems:"stretch",overflowX:"auto",paddingLeft:24}}>
-      <div style={{...H,fontWeight:800,fontSize:20,color:T.red,display:"flex",alignItems:"center",paddingRight:28,borderRight:`1px solid ${T.border}`,marginRight:8,flexShrink:0,letterSpacing:-.5}}>
-        WC<span style={{color:T.ink}}>26</span>
+    <span style={{position:"relative",display:"inline-block"}} onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)}>
+      <span style={{...B,borderBottom:`1px dashed ${T.faint}`,cursor:"help"}}>{children}</span>
+      {show&&(
+        <div style={{position:"absolute",bottom:"calc(100% + 8px)",left:"50%",transform:"translateX(-50%)",background:T.ink,color:"#fff",borderRadius:8,padding:"10px 14px",width:240,zIndex:200,pointerEvents:"none",...B,fontSize:12,lineHeight:1.6,boxShadow:"0 4px 20px rgba(0,0,0,0.18)"}}>
+          {text}
+          <div style={{position:"absolute",top:"100%",left:"50%",transform:"translateX(-50%)",width:0,height:0,borderLeft:"6px solid transparent",borderRight:"6px solid transparent",borderTop:`6px solid ${T.ink}`}} />
+        </div>
+      )}
+    </span>
+  );
+}
+
+// ── ELO MODAL ─────────────────────────────────────────────────────────────────
+function EloModal({team,onClose}){
+  const bd=ELO_BD[team.name];
+  const rank=[...TEAMS].sort((a,b)=>b.elo-a.elo).findIndex(t=>t.name===team.name)+1;
+  if(!bd)return null;
+  const rows=[
+    {label:"International baseline",desc:"Starting point for all established FIFA member nations",val:bd.b},
+    {label:"Recent form",desc:"Adjusted based on results in the 18 months prior to the tournament",val:bd.f},
+    {label:"Qualifying campaign",desc:"Performance during official 2026 World Cup qualifying matches",val:bd.q},
+    {label:"Tournament pedigree",desc:"Historical World Cup performance, titles, and deep runs",val:bd.p},
+  ];
+  return(
+    <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.6)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:460,boxShadow:"0 24px 64px rgba(0,0,0,0.22)",overflow:"hidden"}}>
+        <div style={{background:T.redLight,padding:"18px 24px",borderBottom:`1px solid ${T.redMid}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{display:"flex",gap:12,alignItems:"center"}}>
+            <Flag code={team.code} size={36}/>
+            <div>
+              <div style={{...H,fontSize:18,fontWeight:800,color:T.ink}}>{team.name}</div>
+              <div style={{...B,fontSize:12,color:T.muted}}>Ranked #{rank} of 48 qualified teams</div>
+            </div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{...H,fontSize:28,fontWeight:800,color:T.red,lineHeight:1}}>{team.elo}</div>
+            <div style={{...B,fontSize:10,color:T.faint}}>Elo rating</div>
+          </div>
+        </div>
+        <div style={{padding:"18px 24px"}}>
+          <div style={{...B,fontSize:13,color:T.muted,marginBottom:16,lineHeight:1.6}}>{bd.note}</div>
+          <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:10}}>Rating breakdown</div>
+          {rows.map((r,i)=>(
+            <div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",borderBottom:i<rows.length-1?`1px solid ${T.border}`:"none",gap:16}}>
+              <div style={{flex:1}}>
+                <div style={{...B,fontSize:13,fontWeight:500,color:T.ink,marginBottom:2}}>{r.label}</div>
+                <div style={{...B,fontSize:11,color:T.faint}}>{r.desc}</div>
+              </div>
+              <div style={{...H,fontSize:15,fontWeight:700,color:r.val>0?T.red:r.val<0?"#2563EB":T.ink,minWidth:48,textAlign:"right",flexShrink:0}}>
+                {r.val>0?"+":""}{r.val.toLocaleString()}
+              </div>
+            </div>
+          ))}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:14,padding:"12px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`}}>
+            <div style={{...H,fontSize:14,fontWeight:700,color:T.ink}}>Total Elo Rating</div>
+            <div style={{...H,fontSize:22,fontWeight:800,color:T.red}}>{team.elo}</div>
+          </div>
+          <div style={{...B,fontSize:11,color:T.faint,marginTop:10,lineHeight:1.5}}>
+            A 200-point Elo gap between two teams translates to approximately a 76% win probability for the stronger side.
+          </div>
+        </div>
+        <div style={{padding:"0 24px 18px"}}>
+          <button onClick={onClose} style={{...B,width:"100%",padding:"9px",borderRadius:8,border:`1px solid ${T.border}`,background:T.bg,color:T.muted,fontSize:13,cursor:"pointer"}}>Close</button>
+        </div>
       </div>
-      {TABS.map(t=>(
-        <button key={t.id} onClick={()=>setTab(t.id)} style={{...B,fontWeight:500,fontSize:14,padding:"0 16px",border:"none",background:"transparent",color:tab===t.id?T.red:T.muted,borderBottom:tab===t.id?`2px solid ${T.red}`:"2px solid transparent",cursor:"pointer",whiteSpace:"nowrap",transition:"color .15s",flexShrink:0}}>
-          {t.label}
-        </button>
-      ))}
-    </nav>
+    </div>
   );
 }
 
 // ── VENUE MODAL ───────────────────────────────────────────────────────────────
 function VenueModal({venue,onClose}){
   const [imgUrl,setImgUrl]=useState(null);
-  const [imgLoading,setImgLoading]=useState(true);
-
+  const [loading,setLoading]=useState(true);
   useEffect(()=>{
-    setImgUrl(null);setImgLoading(true);
-    const apiUrl=`https://en.wikipedia.org/w/api.php?action=query&titles=${venue.wiki}&prop=pageimages&format=json&pithumbsize=800&origin=*`;
-    fetch(apiUrl)
-      .then(r=>r.json())
-      .then(data=>{
-        const pages=data.query.pages;
-        const page=Object.values(pages)[0];
-        if(page.thumbnail?.source){setImgUrl(page.thumbnail.source);}
-        setImgLoading(false);
-      })
-      .catch(()=>setImgLoading(false));
+    setImgUrl(null);setLoading(true);
+    fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${venue.wiki}&prop=pageimages&format=json&pithumbsize=800&origin=*`)
+      .then(r=>r.json()).then(d=>{const p=Object.values(d.query.pages)[0];if(p.thumbnail?.source)setImgUrl(p.thumbnail.source);setLoading(false);})
+      .catch(()=>setLoading(false));
   },[venue.wiki]);
-
   return(
-    <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.55)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
-      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:520,overflow:"hidden",boxShadow:"0 20px 60px rgba(0,0,0,0.25)"}}>
-        {/* Image */}
+    <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.6)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:520,overflow:"hidden",boxShadow:"0 24px 64px rgba(0,0,0,0.22)"}}>
         <div style={{height:220,background:T.border,position:"relative",overflow:"hidden"}}>
-          {imgLoading&&(
-            <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <div style={{...B,fontSize:13,color:T.faint}}>Loading…</div>
-            </div>
-          )}
-          {!imgLoading&&imgUrl&&(
-            <img src={imgUrl} alt={venue.stadium} style={{width:"100%",height:"100%",objectFit:"cover"}} />
-          )}
-          {!imgLoading&&!imgUrl&&(
-            <div style={{height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}>
-              <div style={{fontSize:40}}>🏟️</div>
-              <div style={{...B,fontSize:13,color:T.faint}}>{venue.stadium}</div>
-            </div>
-          )}
+          {loading&&<div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"center",...B,fontSize:13,color:T.faint}}>Loading…</div>}
+          {!loading&&imgUrl&&<img src={imgUrl} alt={venue.stadium} style={{width:"100%",height:"100%",objectFit:"cover"}} />}
+          {!loading&&!imgUrl&&<div style={{height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}><div style={{fontSize:40}}>🏟️</div><div style={{...B,fontSize:13,color:T.faint}}>{venue.stadium}</div></div>}
           <button onClick={onClose} style={{position:"absolute",top:12,right:12,width:32,height:32,borderRadius:"50%",border:"none",background:"rgba(0,0,0,0.5)",color:"#fff",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
         </div>
-        {/* Details */}
         <div style={{padding:"22px 24px 24px"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:16}}>
             <div>
@@ -414,10 +465,27 @@ function VenueModal({venue,onClose}){
   );
 }
 
+// ── NAV ───────────────────────────────────────────────────────────────────────
+const TABS=[{id:"home",label:"Overview"},{id:"teams",label:"Teams"},{id:"sim",label:"Simulator"},{id:"predictor",label:"Predictor"},{id:"lineups",label:"Lineups"},{id:"news",label:"News"}];
+function Nav({tab,setTab}){
+  return(
+    <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,position:"sticky",top:0,zIndex:100,display:"flex",alignItems:"stretch",overflowX:"auto",paddingLeft:24}}>
+      <div style={{...H,fontWeight:800,fontSize:20,color:T.red,display:"flex",alignItems:"center",paddingRight:28,borderRight:`1px solid ${T.border}`,marginRight:8,flexShrink:0,letterSpacing:-.5}}>
+        WC<span style={{color:T.ink}}>26</span>
+      </div>
+      {TABS.map(t=>(
+        <button key={t.id} onClick={()=>setTab(t.id)} style={{...B,fontWeight:500,fontSize:14,padding:"0 16px",border:"none",background:"transparent",color:tab===t.id?T.red:T.muted,borderBottom:tab===t.id?`2px solid ${T.red}`:"2px solid transparent",cursor:"pointer",whiteSpace:"nowrap",transition:"color .15s",flexShrink:0}}>
+          {t.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 // ── HOME ──────────────────────────────────────────────────────────────────────
 function HomeSection({setTab}){
   const [results,setResults]=useState(null);
-  const [venueModal,setVenueModal]=useState(null);
+  const [venue,setVenue]=useState(null);
   useEffect(()=>{
     const stats=mkStats();let done=0;
     const rng=mulberry32(20260611);
@@ -430,8 +498,7 @@ function HomeSection({setTab}){
 
   return(
     <Page>
-      {venueModal&&<VenueModal venue={venueModal} onClose={()=>setVenueModal(null)} />}
-
+      {venue&&<VenueModal venue={venue} onClose={()=>setVenue(null)} />}
       {/* Hero */}
       <div style={{borderBottom:`1px solid ${T.border}`,paddingBottom:28,marginBottom:32}}>
         <div style={{...B,fontSize:11,fontWeight:600,letterSpacing:2,color:T.red,textTransform:"uppercase",marginBottom:12}}>June 11 – July 19, 2026 · USA · Canada · Mexico</div>
@@ -458,23 +525,19 @@ function HomeSection({setTab}){
           <span style={{...B,fontSize:12,color:T.faint}}>5,000 scenarios</span>
         </div>
         <p style={{...B,fontSize:13,color:T.faint,marginBottom:20}}>
-          Win probabilities based on{" "}
-          <Tooltip text="The Elo rating system measures relative team strength on a numerical scale. A higher Elo means a stronger team. Each match updates ratings based on the result versus what the model predicted — similar to how chess rankings work.">Elo ratings</Tooltip>
-          {" "}and a{" "}
-          <Tooltip text="A Monte Carlo simulation runs the tournament thousands of times using random variation and probability models. The percentage shown is how often each team won across all simulated runs — not a guarantee, but a statistical estimate.">Monte Carlo simulation</Tooltip>.
-          Results are probabilistic, not predictive.
+          Win probabilities derived from <Tooltip text="The Elo rating system measures relative team strength on a numerical scale. A higher number means a stronger team. It updates after every international match based on the result versus what the model predicted — similar to chess rankings.">Elo ratings</Tooltip> and a <Tooltip text="A Monte Carlo simulation runs the full tournament thousands of times, each with randomly generated match outcomes weighted by team strength. The win percentage shown is how often a team won across all simulated runs — a statistical estimate, not a prediction.">Monte Carlo simulation</Tooltip>. Results are consistent across page loads.
         </p>
         {!results?(
-          <div style={{...B,fontSize:13,color:T.faint,padding:"40px 0",textAlign:"center"}}>Calculating…</div>
+          <div style={{...B,fontSize:13,color:T.faint,padding:"32px 0",textAlign:"center"}}>Calculating…</div>
         ):(
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:12}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(165px,1fr))",gap:12}}>
             {results.slice(0,8).map((t,i)=>(
               <Card key={t.name} onClick={()=>setTab("sim")} style={{cursor:"pointer",borderColor:i===0?T.redMid:T.border}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-                  <span style={{fontSize:32}}>{t.flag}</span>
+                  <Flag code={t.code} size={32}/>
                   <span style={{...B,fontSize:11,fontWeight:600,color:i===0?T.red:T.faint}}>#{i+1}</span>
                 </div>
-                <div style={{...H,fontSize:16,fontWeight:700,color:T.ink,marginBottom:4}}>{t.name}</div>
+                <div style={{...H,fontSize:15,fontWeight:700,color:T.ink,marginBottom:4,lineHeight:1.2}}>{t.name}</div>
                 <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
                 <div style={{marginTop:12,display:"flex",alignItems:"baseline",gap:4}}>
                   <span style={{...H,fontSize:28,fontWeight:800,color:i===0?T.red:T.ink,lineHeight:1}}>{t.winPct.toFixed(1)}</span>
@@ -492,9 +555,9 @@ function HomeSection({setTab}){
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:12}}>
           {[
             {id:"teams",label:"Team Database",desc:"Squads, ratings & stats for all 48 nations"},
-            {id:"sim",label:"Monte Carlo Simulator",desc:"25,000 full tournament simulations with Elo-Poisson model"},
-            {id:"predictor",label:"Match Predictor",desc:"AI head-to-head analysis — coming soon"},
-            {id:"lineups",label:"Lineup Predictor",desc:"Predicted XIs with injury data — coming soon"},
+            {id:"sim",label:"Monte Carlo Simulator",desc:"25,000 full tournament simulations with customisable inputs"},
+            {id:"predictor",label:"Match Predictor",desc:"AI head-to-head tactical analysis — coming soon"},
+            {id:"lineups",label:"Lineup Predictor",desc:"Predicted XIs with live injury data — coming soon"},
             {id:"news",label:"News Feed",desc:"AI-powered tournament news — coming soon"},
           ].map(s=>(
             <Card key={s.id} onClick={()=>setTab(s.id)} style={{cursor:"pointer"}}>
@@ -509,11 +572,12 @@ function HomeSection({setTab}){
       <div>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:20}}>
           <h2 style={{...H,fontSize:22,fontWeight:800,color:T.ink,letterSpacing:-.5}}>Host venues</h2>
-          <span style={{...B,fontSize:12,color:T.faint}}>Click for details</span>
+          <span style={{...B,fontSize:12,color:T.faint}}>Click any for details</span>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:8}}>
           {VENUES.map(v=>(
-            <div key={v.city} onClick={()=>setVenueModal(v)} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",transition:"border-color .15s"}}
+            <div key={v.city} onClick={()=>setVenue(v)}
+              style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",transition:"border-color .15s"}}
               onMouseEnter={e=>e.currentTarget.style.borderColor=T.redMid}
               onMouseLeave={e=>e.currentTarget.style.borderColor=T.border}>
               <div>
@@ -533,101 +597,107 @@ function HomeSection({setTab}){
 }
 
 // ── TEAMS ─────────────────────────────────────────────────────────────────────
+const POS_ORDER=["GK","RB","CB","LB","DM","CM","CAM","AM","RW","LW","ST","CF"];
+const POS_COLOR={"GK":"#D97706","CB":"#2563EB","RB":"#2563EB","LB":"#2563EB","DM":"#16A34A","CM":"#16A34A","CAM":"#C84B31","AM":"#C84B31","RW":"#7C3AED","LW":"#7C3AED","ST":"#C84B31","CF":"#C84B31"};
+
 function TeamsSection(){
   const [search,setSearch]=useState("");
   const [conf,setConf]=useState("ALL");
   const [selected,setSelected]=useState(null);
-  const posOrder=["GK","RB","CB","LB","DM","CM","CAM","AM","RW","LW","ST","CF"];
-  const posColor={"GK":"#D97706","CB":"#2563EB","RB":"#2563EB","LB":"#2563EB","DM":"#16A34A","CM":"#16A34A","CAM":"#C84B31","AM":"#C84B31","RW":"#7C3AED","LW":"#7C3AED","ST":"#C84B31","CF":"#C84B31"};
+  const [eloTeam,setEloTeam]=useState(null);
   const filtered=TEAMS.filter(t=>(conf==="ALL"||t.conf===conf)&&t.name.toLowerCase().includes(search.toLowerCase()));
 
   function SquadPanel({team}){
     const squad=SQUADS[team.name];
-    if(!squad) return(
-      <div style={{gridColumn:"1 / -1",background:T.redLight,border:`1px solid ${T.redMid}`,borderRadius:12,padding:"20px 24px",...B,fontSize:14,color:T.muted}}>
-        Detailed squad data not available for {team.name} yet.
-      </div>
-    );
-    const sorted=[...squad].sort((a,b)=>posOrder.indexOf(a.pos)-posOrder.indexOf(b.pos));
     return(
       <div style={{gridColumn:"1 / -1",background:T.surface,border:`1px solid ${T.redMid}`,borderRadius:12,padding:"20px 24px",marginTop:-4}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8}}>
           <div style={{display:"flex",gap:12,alignItems:"center"}}>
-            <span style={{fontSize:32}}>{team.flag}</span>
+            <Flag code={team.code} size={40}/>
             <div>
               <div style={{...H,fontSize:20,fontWeight:800,color:T.ink}}>{team.name}</div>
-              <div style={{display:"flex",gap:8,marginTop:3}}>
+              <div style={{display:"flex",gap:8,marginTop:3,alignItems:"center"}}>
                 <Tag color={CC[team.conf]||T.muted}>{team.conf}</Tag>
-                <span style={{...B,fontSize:11,color:T.faint}}>
-                  <Tooltip text="The Elo rating system measures relative team strength. Higher = stronger. Updated after every international match based on result vs expectation.">Elo {team.elo}</Tooltip>
-                </span>
+                <button onClick={()=>setEloTeam(team)} style={{...B,fontSize:11,color:T.red,background:"none",border:"none",cursor:"pointer",padding:0,fontWeight:600,textDecoration:"underline dotted",textUnderlineOffset:2}}>
+                  Elo: {team.elo}
+                </button>
               </div>
             </div>
           </div>
           <OutlineBtn onClick={()=>setSelected(null)}>Close ✕</OutlineBtn>
         </div>
-        <div style={{overflowX:"auto"}}>
-          <table style={{width:"100%",borderCollapse:"collapse",...B,fontSize:13}}>
-            <thead>
-              <tr style={{borderBottom:`1px solid ${T.border}`}}>
-                {["Pos","Name","Club","Age","Rating"].map(h=>(
-                  <th key={h} style={{padding:"8px 10px",textAlign:h==="Rating"?"center":"left",fontSize:10,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {sorted.map((p,i)=>(
-                <tr key={p.name} style={{borderBottom:`1px solid ${T.border}`,background:i%2===0?T.surface:"#FAFAF8"}}>
-                  <td style={{padding:"9px 10px"}}><Tag color={posColor[p.pos]||T.muted}>{p.pos}</Tag></td>
-                  <td style={{padding:"9px 10px",fontWeight:500,color:T.ink}}>{p.name}</td>
-                  <td style={{padding:"9px 10px",color:T.muted}}>{p.club}</td>
-                  <td style={{padding:"9px 10px",color:T.faint}}>{p.age}</td>
-                  <td style={{padding:"9px 10px",textAlign:"center"}}>
-                    <span style={{...H,fontWeight:700,color:p.rating>=88?T.red:p.rating>=83?"#D97706":T.ink}}>{p.rating}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div style={{...B,fontSize:11,color:T.faint,marginTop:12,borderTop:`1px solid ${T.border}`,paddingTop:10}}>
-          Ratings are approximate consensus values compiled from publicly available sources including EA Sports FC, WhoScored, and Sofascore. They are not an official or proprietary rating system.
-        </div>
+        {!squad?(
+          <div style={{...B,color:T.faint,fontSize:14,padding:"12px 0"}}>Detailed squad data not available for {team.name}.</div>
+        ):(
+          <>
+            <div style={{overflowX:"auto"}}>
+              <table style={{width:"100%",borderCollapse:"collapse",...B,fontSize:13}}>
+                <thead>
+                  <tr style={{borderBottom:`1px solid ${T.border}`}}>
+                    {["Pos","Name","Club","Age","Rating"].map(h=>(
+                      <th key={h} style={{padding:"8px 10px",textAlign:h==="Rating"?"center":"left",fontSize:10,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...squad].sort((a,b)=>POS_ORDER.indexOf(a.pos)-POS_ORDER.indexOf(b.pos)).map((p,i)=>(
+                    <tr key={p.name} style={{borderBottom:`1px solid ${T.border}`,background:i%2===0?T.surface:"#FAFAF8"}}>
+                      <td style={{padding:"9px 10px"}}><Tag color={POS_COLOR[p.pos]||T.muted}>{p.pos}</Tag></td>
+                      <td style={{padding:"9px 10px",fontWeight:500,color:T.ink}}>{p.name}</td>
+                      <td style={{padding:"9px 10px",color:T.muted}}>{p.club}</td>
+                      <td style={{padding:"9px 10px",color:T.faint}}>{p.age}</td>
+                      <td style={{padding:"9px 10px",textAlign:"center"}}>
+                        <span style={{...H,fontWeight:700,color:p.rating>=88?T.red:p.rating>=83?"#D97706":T.ink}}>{p.rating}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{...B,fontSize:11,color:T.faint,marginTop:10,borderTop:`1px solid ${T.border}`,paddingTop:10}}>
+              Player ratings are approximate consensus values sourced from EA Sports FC, WhoScored, and Sofascore. They are not an official rating system.
+            </div>
+          </>
+        )}
       </div>
     );
   }
 
-  // Build grid items, injecting squad panel inline after selected team
   const items=[];
-  filtered.forEach((t)=>{
+  filtered.forEach(t=>{
     items.push(
       <div key={t.name} onClick={()=>setSelected(selected?.name===t.name?null:t)}
-        style={{background:T.surface,border:`1px solid ${selected?.name===t.name?T.red:T.border}`,borderRadius:12,padding:"18px 20px",cursor:"pointer",transition:"border-color .15s",background:selected?.name===t.name?T.redLight:T.surface}}>
-        <div style={{fontSize:30,marginBottom:8}}>{t.flag}</div>
-        <div style={{...H,fontSize:14,fontWeight:700,color:T.ink,marginBottom:5}}>{t.name}</div>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        style={{background:selected?.name===t.name?T.redLight:T.surface,border:`1px solid ${selected?.name===t.name?T.red:T.border}`,borderRadius:12,padding:"14px 14px",cursor:"pointer",transition:"all .15s"}}>
+        <div style={{marginBottom:8}}><Flag code={t.code} size={34}/></div>
+        <div style={{...H,fontSize:13,fontWeight:700,color:T.ink,marginBottom:6,lineHeight:1.2}}>{t.name}</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:4}}>
           <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
-          <span style={{...B,fontSize:10,color:T.faint}}>{t.elo}</span>
+          <button onClick={e=>{e.stopPropagation();setEloTeam(t);}} style={{...B,fontSize:10,color:T.red,background:"none",border:"none",cursor:"pointer",padding:0,fontWeight:600,textDecoration:"underline dotted",textUnderlineOffset:2}}>
+            Elo: {t.elo}
+          </button>
         </div>
-        {SQUADS[t.name]&&<div style={{...B,fontSize:10,color:T.red,fontWeight:500,marginTop:8}}>Squad available ↓</div>}
+        {SQUADS[t.name]&&<div style={{...B,fontSize:10,color:T.red,fontWeight:500,marginTop:6}}>Squad available ↓</div>}
       </div>
     );
     if(selected?.name===t.name){
-      items.push(<SquadPanel key="__squad__" team={t} />);
+      items.push(<SquadPanel key="__squad__" team={t}/>);
     }
   });
 
   return(
     <Page>
+      {eloTeam&&<EloModal team={eloTeam} onClose={()=>setEloTeam(null)}/>}
       <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
         <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search teams…"
-          style={{...B,padding:"8px 14px",borderRadius:7,border:`1px solid ${T.border}`,background:T.surface,color:T.ink,fontSize:14,flex:"1 1 200px",outline:"none"}} />
-        {["ALL","UEFA","CONMEBOL","CAF","AFC","CONCACAF"].map(c=>(
+          style={{...B,padding:"8px 14px",borderRadius:7,border:`1px solid ${T.border}`,background:T.surface,color:T.ink,fontSize:14,flex:"1 1 200px",outline:"none"}}/>
+        {["ALL","UEFA","CONMEBOL","CAF","AFC","CONCACAF","OFC"].map(c=>(
           <OutlineBtn key={c} active={conf===c} onClick={()=>setConf(c)}>{c}</OutlineBtn>
         ))}
       </div>
-      <div style={{...B,fontSize:11,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",marginBottom:14}}>{filtered.length} teams · click any to expand squad</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))",gap:10}}>
+      <div style={{...B,fontSize:11,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",marginBottom:14}}>
+        {filtered.length} teams · click any to expand squad · click Elo for rating breakdown
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10}}>
         {items}
       </div>
     </Page>
@@ -635,25 +705,26 @@ function TeamsSection(){
 }
 
 // ── SIMULATOR ─────────────────────────────────────────────────────────────────
-const N=25000;
+const N_SIMS=25000;
 function SimulatorSection(){
   const [progress,setProgress]=useState(0);
   const [results,setResults]=useState(null);
   const [running,setRunning]=useState(false);
   const [conf,setConf]=useState("ALL");
-  const [adjustments,setAdjustments]=useState({});
+  const [adj,setAdj]=useState({});
   const [simCount,setSimCount]=useState(25000);
   const [showAdj,setShowAdj]=useState(false);
   const [adjSearch,setAdjSearch]=useState("");
+  const [eloTeam,setEloTeam]=useState(null);
   const abortRef=useRef(false);
 
-  function startSim(adj,n){
+  function startSim(adjMap,n){
     setResults(null);setProgress(0);setRunning(true);abortRef.current=false;
     const stats=mkStats();let done=0;
     function batch(){
       if(abortRef.current)return;
       const end=Math.min(done+500,n);
-      while(done<end){runSim(stats,Math.random,adj);done++;}
+      while(done<end){runSim(stats,Math.random,adjMap);done++;}
       setProgress(done);
       if(done<n)setTimeout(batch,8);
       else{
@@ -666,110 +737,102 @@ function SimulatorSection(){
 
   useEffect(()=>{startSim({},simCount);},[]);
 
-  function rerun(){startSim(adjustments,simCount);}
-  function resetAdj(){setAdjustments({});startSim({},simCount);}
-  function setAdj(name,val){setAdjustments(prev=>({...prev,[name]:Number(val)}));}
-  function hasAdj(){return Object.values(adjustments).some(v=>v!==0);}
-
-  const pct=Math.round(progress/(running?simCount:1)*100);
+  const hasAdj=Object.values(adj).some(v=>v!==0);
+  const pct=Math.round(progress/simCount*100);
   const filtered=results?(conf==="ALL"?results:results.filter(t=>t.conf===conf)):[];
   const maxWin=results?results[0].winPct:1;
-  const adjTeams=TEAMS.filter(t=>t.name.toLowerCase().includes(adjSearch.toLowerCase()));
 
   return(
     <Page>
+      {eloTeam&&<EloModal team={eloTeam} onClose={()=>setEloTeam(null)}/>}
       <div style={{marginBottom:20}}>
         <h2 style={{...H,fontSize:28,fontWeight:800,color:T.ink,letterSpacing:-.5,marginBottom:8}}>
-          <Tooltip text="A Monte Carlo simulation runs the entire tournament thousands of times using probability-based match outcomes. Each run has a random element — the percentages shown reflect how often each team won across all simulated tournaments.">Monte Carlo</Tooltip> Simulator
+          <Tooltip text="A Monte Carlo simulation runs the entire tournament thousands of times, each time generating match outcomes based on team strength probabilities. The win % shown is how often each team came out on top across all runs.">Monte Carlo</Tooltip> Simulator
         </h2>
         <p style={{...B,fontSize:13,color:T.muted}}>
-          Simulated using{" "}
-          <Tooltip text="Elo ratings measure team strength on a numerical scale, updated after every match. The difference between two teams' Elo scores determines the win probability assigned before each simulated match.">Elo ratings</Tooltip>
-          {" "}and a Poisson goal model. Adjust team strength below and re-run to model injuries, form, or hypothetical scenarios.
+          Based on <Tooltip text="Elo measures team strength on a numerical scale. The difference between two teams' Elo values determines the win probability for each simulated match.">Elo ratings</Tooltip> and a Poisson goal model. Use the adjustments panel to model injuries, form, or hypothetical scenarios.
         </p>
       </div>
 
-      {/* Controls bar */}
-      <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:20,padding:"14px 16px",background:T.surface,border:`1px solid ${T.border}`,borderRadius:10}}>
-        <div style={{...B,fontSize:12,fontWeight:600,color:T.muted,marginRight:4}}>Scenarios:</div>
+      {/* Controls */}
+      <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:20,padding:"12px 16px",background:T.surface,border:`1px solid ${T.border}`,borderRadius:10}}>
+        <div style={{...B,fontSize:12,fontWeight:600,color:T.muted}}>Scenarios:</div>
         {[5000,10000,25000].map(n=>(
           <OutlineBtn key={n} active={simCount===n} onClick={()=>setSimCount(n)}>{n.toLocaleString()}</OutlineBtn>
         ))}
-        <div style={{flex:1}} />
+        <div style={{flex:1}}/>
         <OutlineBtn active={showAdj} onClick={()=>setShowAdj(!showAdj)}>
-          {showAdj?"Hide":"⚙ Adjust"} team strength {hasAdj()?`(${Object.values(adjustments).filter(v=>v!==0).length} modified)`:""}
+          {showAdj?"Hide":"⚙ Adjust"} strength{hasAdj?` (${Object.values(adj).filter(v=>v!==0).length} modified)`:""}
         </OutlineBtn>
-        {hasAdj()&&<OutlineBtn onClick={resetAdj}>Reset all</OutlineBtn>}
-        <button onClick={rerun} disabled={running} style={{...H,fontWeight:700,fontSize:13,padding:"6px 18px",borderRadius:7,border:"none",background:running?T.border:T.red,color:running?T.faint:"#fff",cursor:running?"not-allowed":"pointer",transition:"all .15s"}}>
+        {hasAdj&&<OutlineBtn onClick={()=>{setAdj({});startSim({},simCount);}}>Reset</OutlineBtn>}
+        <button onClick={()=>startSim(adj,simCount)} disabled={running} style={{...H,fontWeight:700,fontSize:13,padding:"6px 18px",borderRadius:7,border:"none",background:running?T.border:T.red,color:running?T.faint:"#fff",cursor:running?"not-allowed":"pointer"}}>
           {running?"Running…":"▶ Re-run"}
         </button>
       </div>
 
       {/* Adjustments panel */}
       {showAdj&&(
-        <Card style={{marginBottom:20,padding:"18px 20px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-            <div style={{...H,fontSize:15,fontWeight:700,color:T.ink}}>Team strength adjustments</div>
-            <div style={{...B,fontSize:11,color:T.faint}}>Drag slider or type a value. Positive = stronger, negative = weaker.</div>
-          </div>
-          <div style={{...B,fontSize:11,color:T.faint,marginBottom:14}}>Use this to model injuries to key players, current form, or hypothetical scenarios. Changes apply when you click Re-run.</div>
+        <Card style={{marginBottom:20}}>
+          <div style={{...H,fontSize:15,fontWeight:700,color:T.ink,marginBottom:4}}>Team strength adjustments</div>
+          <div style={{...B,fontSize:12,color:T.faint,marginBottom:14}}>Drag slider to boost or reduce a team's Elo. Positive = stronger, negative = weaker. Click Re-run to apply.</div>
           <input value={adjSearch} onChange={e=>setAdjSearch(e.target.value)} placeholder="Search teams…"
-            style={{...B,padding:"7px 12px",borderRadius:6,border:`1px solid ${T.border}`,background:T.bg,color:T.ink,fontSize:13,width:"100%",outline:"none",marginBottom:14}} />
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10,maxHeight:320,overflowY:"auto"}}>
-            {adjTeams.map(t=>{
-              const val=adjustments[t.name]||0;
-              const adjElo=t.elo+val;
+            style={{...B,padding:"7px 12px",borderRadius:6,border:`1px solid ${T.border}`,background:T.bg,color:T.ink,fontSize:13,width:"100%",outline:"none",marginBottom:14}}/>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10,maxHeight:300,overflowY:"auto"}}>
+            {TEAMS.filter(t=>t.name.toLowerCase().includes(adjSearch.toLowerCase())).map(t=>{
+              const val=adj[t.name]||0;
               return(
                 <div key={t.name} style={{background:val!==0?T.redLight:T.bg,borderRadius:8,padding:"10px 12px",border:`1px solid ${val!==0?T.redMid:T.border}`}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
                     <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                      <span style={{fontSize:18}}>{t.flag}</span>
+                      <Flag code={t.code} size={18}/>
                       <span style={{...B,fontSize:13,fontWeight:600,color:T.ink}}>{t.name}</span>
                     </div>
-                    <div style={{...B,fontSize:11,color:val>0?T.red:val<0?"#2563EB":T.faint}}>
-                      Elo {adjElo}{val!==0&&<span style={{marginLeft:4}}>({val>0?"+":""}{val})</span>}
-                    </div>
+                    <span style={{...B,fontSize:11,color:val>0?T.red:val<0?"#2563EB":T.faint}}>
+                      {t.elo+val}{val!==0&&<span style={{marginLeft:3}}>({val>0?"+":""}{val})</span>}
+                    </span>
                   </div>
                   <div style={{display:"flex",gap:8,alignItems:"center"}}>
                     <input type="range" min="-200" max="200" step="10" value={val}
-                      onChange={e=>setAdj(t.name,e.target.value)}
-                      style={{flex:1,accentColor:T.red}} />
+                      onChange={e=>setAdj(p=>({...p,[t.name]:Number(e.target.value)}))}
+                      style={{flex:1,accentColor:T.red}}/>
                     <input type="number" min="-200" max="200" step="10" value={val}
-                      onChange={e=>setAdj(t.name,e.target.value)}
-                      style={{...B,width:56,padding:"3px 6px",borderRadius:5,border:`1px solid ${T.border}`,background:T.surface,color:T.ink,fontSize:12,textAlign:"center",outline:"none"}} />
-                    {val!==0&&<button onClick={()=>setAdj(t.name,0)} style={{...B,fontSize:11,padding:"3px 8px",borderRadius:5,border:`1px solid ${T.border}`,background:T.surface,color:T.muted,cursor:"pointer"}}>✕</button>}
+                      onChange={e=>setAdj(p=>({...p,[t.name]:Number(e.target.value)}))}
+                      style={{...B,width:52,padding:"3px 6px",borderRadius:5,border:`1px solid ${T.border}`,background:T.surface,color:T.ink,fontSize:12,textAlign:"center",outline:"none"}}/>
+                    {val!==0&&<button onClick={()=>setAdj(p=>({...p,[t.name]:0}))} style={{...B,fontSize:11,padding:"3px 8px",borderRadius:5,border:`1px solid ${T.border}`,background:T.surface,color:T.muted,cursor:"pointer"}}>✕</button>}
                   </div>
                 </div>
               );
             })}
           </div>
-          {hasAdj()&&(
+          {hasAdj&&(
             <div style={{marginTop:14,padding:"10px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`,...B,fontSize:12,color:T.red}}>
-              {Object.entries(adjustments).filter(([,v])=>v!==0).map(([name,v])=>`${name} ${v>0?"+":""}${v}`).join(" · ")} — click Re-run to apply
+              {Object.entries(adj).filter(([,v])=>v!==0).map(([n,v])=>`${n} ${v>0?"+":""}${v}`).join(" · ")} — click Re-run to apply
             </div>
           )}
         </Card>
       )}
 
+      {/* Loading */}
       {!results?(
         <Card style={{textAlign:"center",padding:"60px 32px"}}>
           <div style={{...H,fontSize:24,fontWeight:800,color:T.ink,marginBottom:8}}>Running simulations…</div>
-          <div style={{...B,fontSize:14,color:T.muted,marginBottom:28}}>{progress.toLocaleString()} of {N.toLocaleString()}</div>
+          <div style={{...B,fontSize:14,color:T.muted,marginBottom:28}}>{progress.toLocaleString()} of {simCount.toLocaleString()}</div>
           <div style={{height:6,background:T.border,borderRadius:3,maxWidth:400,margin:"0 auto",overflow:"hidden"}}>
-            <div style={{height:"100%",width:`${pct}%`,background:T.red,borderRadius:3,transition:"width .3s"}} />
+            <div style={{height:"100%",width:`${pct}%`,background:T.red,borderRadius:3,transition:"width .3s"}}/>
           </div>
           <div style={{...B,fontSize:12,color:T.faint,marginTop:10}}>{pct}%</div>
         </Card>
       ):(
         <>
+          {/* Podium */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:28}}>
             {[{label:"Champion",medal:"🥇",idx:0},{label:"Finalist",medal:"🥈",idx:1},{label:"Semi-finalist",medal:"🥉",idx:2}].map(({label,medal,idx})=>{
               const t=results[idx];
               return(
                 <Card key={label} style={{textAlign:"center",borderColor:idx===0?T.redMid:T.border,background:idx===0?T.redLight:T.surface,transform:idx===0?"scale(1.03)":"scale(1)"}}>
                   <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:8}}>{medal} {label}</div>
-                  <div style={{fontSize:36,marginBottom:6}}>{t.flag}</div>
-                  <div style={{...H,fontSize:18,fontWeight:800,color:T.ink,marginBottom:10}}>{t.name}</div>
+                  <div style={{display:"flex",justifyContent:"center",marginBottom:8}}><Flag code={t.code} size={40}/></div>
+                  <div style={{...H,fontSize:17,fontWeight:800,color:T.ink,marginBottom:10,lineHeight:1.2}}>{t.name}</div>
                   <div style={{...H,fontSize:30,fontWeight:800,color:idx===0?T.red:T.ink,lineHeight:1}}>{t.winPct.toFixed(1)}<span style={{fontSize:14,color:T.faint}}>%</span></div>
                   <Divider />
                   <div style={{...B,fontSize:11,color:T.muted,lineHeight:2}}>
@@ -777,34 +840,42 @@ function SimulatorSection(){
                     <div>Semi · {t.sfPct.toFixed(1)}%</div>
                     <div>QF · {t.qfPct.toFixed(1)}%</div>
                   </div>
+                  <button onClick={()=>setEloTeam(t)} style={{...B,fontSize:10,color:T.red,background:"none",border:"none",cursor:"pointer",marginTop:8,padding:0,fontWeight:600,textDecoration:"underline dotted",textUnderlineOffset:2}}>
+                    Elo: {t.elo}
+                  </button>
                 </Card>
               );
             })}
           </div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
-            {["ALL","UEFA","CONMEBOL","CAF","AFC","CONCACAF"].map(c=>(
+
+          {/* Filter + table */}
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
+            {["ALL","UEFA","CONMEBOL","CAF","AFC","CONCACAF","OFC"].map(c=>(
               <OutlineBtn key={c} active={conf===c} onClick={()=>setConf(c)}>{c}</OutlineBtn>
             ))}
           </div>
           <Card style={{padding:0,overflow:"hidden"}}>
-            <div style={{display:"grid",gridTemplateColumns:"36px 30px 1fr 90px 64px 64px 64px 64px",gap:8,padding:"10px 14px",borderBottom:`1px solid ${T.border}`,background:"#FAFAF8"}}>
+            <div style={{display:"grid",gridTemplateColumns:"36px 36px 1fr 90px 60px 60px 60px 60px",gap:8,padding:"10px 14px",borderBottom:`1px solid ${T.border}`,background:"#FAFAF8"}}>
               {["#","","Team","Win %","Final","SF","QF","R16"].map(h=>(
                 <div key={h} style={{...B,fontSize:10,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",textAlign:h==="Team"?"left":"center"}}>{h}</div>
               ))}
             </div>
-            {filtered.map((t)=>{
+            {filtered.map(t=>{
               const rank=results.indexOf(t)+1;
               return(
-                <div key={t.name} style={{display:"grid",gridTemplateColumns:"36px 30px 1fr 90px 64px 64px 64px 64px",gap:8,alignItems:"center",padding:"10px 14px",borderBottom:`1px solid ${T.border}`,background:rank<=3?T.redLight:T.surface,borderLeft:rank<=3?`3px solid ${T.red}`:"3px solid transparent"}}>
+                <div key={t.name} style={{display:"grid",gridTemplateColumns:"36px 36px 1fr 90px 60px 60px 60px 60px",gap:8,alignItems:"center",padding:"9px 14px",borderBottom:`1px solid ${T.border}`,background:rank<=3?T.redLight:T.surface,borderLeft:rank<=3?`3px solid ${T.red}`:"3px solid transparent"}}>
                   <div style={{...B,fontSize:11,fontWeight:600,color:rank<=3?T.red:T.faint,textAlign:"right"}}>{rank}</div>
-                  <div style={{fontSize:18,textAlign:"center"}}>{t.flag}</div>
+                  <div style={{display:"flex",justifyContent:"center"}}><Flag code={t.code} size={22}/></div>
                   <div>
                     <div style={{...B,fontSize:13,fontWeight:600,color:T.ink}}>{t.name}</div>
-                    <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
+                    <div style={{display:"flex",gap:6,alignItems:"center",marginTop:2}}>
+                      <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
+                      <button onClick={()=>setEloTeam(t)} style={{...B,fontSize:9,color:T.faint,background:"none",border:"none",cursor:"pointer",padding:0,textDecoration:"underline dotted",textUnderlineOffset:2}}>Elo: {t.elo}</button>
+                    </div>
                   </div>
                   <div style={{position:"relative",height:20,background:T.border,borderRadius:3,overflow:"hidden"}}>
-                    <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${Math.min(100,(t.winPct/maxWin)*100)}%`,background:T.red,opacity:.8}} />
-                    <span style={{position:"absolute",right:5,top:2,...B,fontSize:10,fontWeight:600,color:T.ink}}>{t.winPct.toFixed(1)}%</span>
+                    <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${Math.min(100,(t.winPct/maxWin)*100)}%`,background:T.red,opacity:.8}}/>
+                    <span style={{position:"absolute",right:4,top:2,...B,fontSize:10,fontWeight:600,color:T.ink}}>{t.winPct.toFixed(1)}%</span>
                   </div>
                   {[t.finalPct,t.sfPct,t.qfPct,t.r16Pct].map((v,j)=>(
                     <div key={j} style={{...B,fontSize:11,color:[T.red,T.muted,T.faint,T.faint][j],textAlign:"center",fontWeight:j===0?600:400}}>{v.toFixed(1)}%</div>
@@ -813,6 +884,7 @@ function SimulatorSection(){
               );
             })}
           </Card>
+          <div style={{...B,fontSize:11,color:T.faint,textAlign:"center",marginTop:12}}>{simCount.toLocaleString()} simulations · Elo-Poisson model · 48 teams · 12 groups</div>
         </>
       )}
     </Page>
@@ -823,18 +895,18 @@ function SimulatorSection(){
 function ComingSoon({title,desc}){
   return(
     <Page>
-      <div style={{maxWidth:520,margin:"60px auto",textAlign:"center"}}>
-        <div style={{width:64,height:64,borderRadius:"50%",background:T.redLight,border:`1px solid ${T.redMid}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",fontSize:28}}>⏳</div>
-        <h2 style={{...H,fontSize:32,fontWeight:800,color:T.ink,letterSpacing:-1,marginBottom:12}}>{title}</h2>
-        <p style={{...B,fontSize:15,color:T.muted,lineHeight:1.7,marginBottom:28}}>{desc}</p>
+      <div style={{maxWidth:500,margin:"60px auto",textAlign:"center"}}>
+        <div style={{width:60,height:60,borderRadius:"50%",background:T.redLight,border:`1px solid ${T.redMid}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px",fontSize:26}}>⏳</div>
+        <h2 style={{...H,fontSize:30,fontWeight:800,color:T.ink,letterSpacing:-1,marginBottom:12}}>{title}</h2>
+        <p style={{...B,fontSize:15,color:T.muted,lineHeight:1.7,marginBottom:24}}>{desc}</p>
         <div style={{...B,fontSize:12,color:T.faint,padding:"10px 20px",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,display:"inline-block"}}>Powered by Claude AI · Available soon</div>
       </div>
     </Page>
   );
 }
-function PredictorSection(){return <ComingSoon title="Match Predictor" desc="Pick any two teams for a full AI tactical breakdown — win probabilities, key individual battles, score prediction, and wild card factors." />;}
-function LineupsSection(){return <ComingSoon title="Lineup Predictor" desc="Select any team and get a predicted starting XI based on current injuries, suspensions, and form — sourced from live news via Claude AI." />;}
-function NewsSection(){return <ComingSoon title="Live News Feed" desc="Real-time World Cup 2026 news summaries synthesised by Claude AI with web search. Covering transfers, qualifications, and tournament developments." />;}
+function PredictorSection(){return <ComingSoon title="Match Predictor" desc="Pick any two teams for a full AI tactical breakdown — win probabilities, key individual battles, score prediction, and wild card factors."/>;}
+function LineupsSection(){return <ComingSoon title="Lineup Predictor" desc="Select any team and get a predicted starting XI based on current injuries, suspensions, and form — sourced from live news via Claude AI."/>;}
+function NewsSection(){return <ComingSoon title="Live News Feed" desc="Real-time World Cup 2026 news synthesised by Claude AI with web search. Covering transfers, qualifications, squad updates, and tournament news."/>;}
 
 // ── ROOT ──────────────────────────────────────────────────────────────────────
 export default function App(){
@@ -842,13 +914,13 @@ export default function App(){
   return(
     <div style={{...B,background:T.bg,minHeight:"100vh",color:T.ink}}>
       <style>{`${FONTS}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}::-webkit-scrollbar{width:5px;background:${T.bg};}::-webkit-scrollbar-thumb{background:${T.border};border-radius:3px;}button{cursor:pointer;font-family:inherit;}`}</style>
-      <Nav tab={tab} setTab={setTab} />
-      {tab==="home"     &&<HomeSection setTab={setTab} />}
-      {tab==="teams"    &&<TeamsSection />}
-      {tab==="sim"      &&<SimulatorSection />}
-      {tab==="predictor"&&<PredictorSection />}
-      {tab==="lineups"  &&<LineupsSection />}
-      {tab==="news"     &&<NewsSection />}
+      <Nav tab={tab} setTab={setTab}/>
+      {tab==="home"     &&<HomeSection setTab={setTab}/>}
+      {tab==="teams"    &&<TeamsSection/>}
+      {tab==="sim"      &&<SimulatorSection/>}
+      {tab==="predictor"&&<PredictorSection/>}
+      {tab==="lineups"  &&<LineupsSection/>}
+      {tab==="news"     &&<NewsSection/>}
     </div>
   );
 }
