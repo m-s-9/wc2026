@@ -471,7 +471,7 @@ function EloModal({team,onClose}){
       </div>
     </div>
   );
-}}
+}
 
 // ── VENUE MODAL ───────────────────────────────────────────────────────────────
 function VenueModal({venue,onClose}){
