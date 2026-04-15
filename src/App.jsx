@@ -1,15 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const FONT_CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap');
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-::-webkit-scrollbar{width:5px;background:#080815;}
-::-webkit-scrollbar-thumb{background:#1a1a30;border-radius:2px;}
-button{cursor:pointer;font-family:inherit;}
-`;
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');`;
 
-const CC = { UEFA:"#4A90E2",CONMEBOL:"#F5A623",CAF:"#7ED321",AFC:"#E91E63",CONCACAF:"#FF6D00",OFC:"#9C27B0" };
-const ACCENT = "#00e676";
+// ── DESIGN TOKENS ─────────────────────────────────────────────────────────────
+const T = {
+  bg:       "#F7F5F2",
+  surface:  "#FFFFFF",
+  border:   "#E8E4DF",
+  borderMd: "#D6D0C8",
+  text:     "#1A1A1A",
+  muted:    "#7A7369",
+  faint:    "#B0A89E",
+  red:      "#C84B31",
+  redLight: "#FAF0ED",
+  redMid:   "#F0C4B8",
+  ink:      "#111111",
+};
+
+const heading = { fontFamily:"'Bricolage Grotesque',sans-serif" };
+const body    = { fontFamily:"'DM Sans',sans-serif" };
 
 // ── 48 TEAMS ──────────────────────────────────────────────────────────────────
 const TEAMS = [
@@ -63,7 +72,9 @@ const TEAMS = [
   {name:"Indonesia",conf:"AFC",elo:1658,flag:"🇮🇩"},
 ];
 
-// ── SQUADS (top 10 teams) ─────────────────────────────────────────────────────
+const CC = {UEFA:"#2563EB",CONMEBOL:"#D97706",CAF:"#16A34A",AFC:"#DC2626",CONCACAF:"#7C3AED",OFC:"#0891B2"};
+
+// ── SQUADS ────────────────────────────────────────────────────────────────────
 const SQUADS = {
   "France":[
     {name:"Mike Maignan",pos:"GK",club:"AC Milan",age:29,rating:88},
@@ -77,11 +88,10 @@ const SQUADS = {
     {name:"Ousmane Dembélé",pos:"RW",club:"PSG",age:28,rating:86},
     {name:"Marcus Thuram",pos:"ST",club:"Inter Milan",age:27,rating:85},
     {name:"Kylian Mbappé",pos:"LW",club:"Real Madrid",age:27,rating:93},
-    {name:"Alphonse Aréola",pos:"GK",club:"West Ham",age:32,rating:80},
-    {name:"Benjamin Pavard",pos:"CB",club:"Inter Milan",age:29,rating:83},
-    {name:"N'Golo Kanté",pos:"DM",club:"Al-Ittihad",age:34,rating:81},
     {name:"Kingsley Coman",pos:"RW",club:"Bayern Munich",age:28,rating:83},
     {name:"Randal Kolo Muani",pos:"ST",club:"PSG",age:26,rating:82},
+    {name:"N'Golo Kanté",pos:"DM",club:"Al-Ittihad",age:34,rating:81},
+    {name:"Benjamin Pavard",pos:"CB",club:"Inter Milan",age:29,rating:83},
   ],
   "Argentina":[
     {name:"Emiliano Martínez",pos:"GK",club:"Aston Villa",age:32,rating:89},
@@ -92,11 +102,11 @@ const SQUADS = {
     {name:"Rodrigo De Paul",pos:"CM",club:"Atlético Madrid",age:30,rating:84},
     {name:"Alexis Mac Allister",pos:"CM",club:"Liverpool",age:26,rating:85},
     {name:"Enzo Fernández",pos:"CM",club:"Chelsea",age:24,rating:83},
-    {name:"Ángel Di María",pos:"RW",club:"Benfica",age:37,rating:80},
-    {name:"Julián Álvarez",pos:"ST",club:"Atlético Madrid",age:25,rating:86},
     {name:"Lionel Messi",pos:"CF",club:"Inter Miami",age:38,rating:91},
+    {name:"Julián Álvarez",pos:"ST",club:"Atlético Madrid",age:25,rating:86},
     {name:"Lautaro Martínez",pos:"ST",club:"Inter Milan",age:27,rating:87},
     {name:"Paulo Dybala",pos:"CAM",club:"Roma",age:32,rating:83},
+    {name:"Ángel Di María",pos:"RW",club:"Benfica",age:37,rating:80},
     {name:"Thiago Almada",pos:"CAM",club:"Botafogo",age:23,rating:79},
     {name:"Germán Pezzella",pos:"CB",club:"Real Betis",age:33,rating:78},
   ],
@@ -111,61 +121,61 @@ const SQUADS = {
     {name:"Phil Foden",pos:"AM",club:"Manchester City",age:25,rating:88},
     {name:"Bukayo Saka",pos:"RW",club:"Arsenal",age:24,rating:88},
     {name:"Harry Kane",pos:"ST",club:"Bayern Munich",age:32,rating:89},
-    {name:"Marcus Rashford",pos:"LW",club:"Manchester United",age:27,rating:83},
     {name:"Cole Palmer",pos:"CAM",club:"Chelsea",age:23,rating:86},
+    {name:"Marcus Rashford",pos:"LW",club:"Manchester United",age:27,rating:83},
     {name:"Ollie Watkins",pos:"ST",club:"Aston Villa",age:29,rating:83},
-    {name:"Conor Gallagher",pos:"CM",club:"Atlético Madrid",age:25,rating:82},
     {name:"Jack Grealish",pos:"LW",club:"Manchester City",age:30,rating:82},
+    {name:"Conor Gallagher",pos:"CM",club:"Atlético Madrid",age:25,rating:82},
   ],
   "Brazil":[
     {name:"Alisson Becker",pos:"GK",club:"Liverpool",age:32,rating:89},
     {name:"Danilo",pos:"RB",club:"Juventus",age:33,rating:82},
     {name:"Marquinhos",pos:"CB",club:"PSG",age:30,rating:86},
     {name:"Gabriel Magalhães",pos:"CB",club:"Arsenal",age:27,rating:85},
-    {name:"Wendell",pos:"LB",club:"Porto",age:30,rating:78},
     {name:"Bruno Guimarães",pos:"DM",club:"Newcastle",age:27,rating:86},
-    {name:"Casemiro",pos:"DM",club:"Manchester United",age:33,rating:83},
     {name:"Lucas Paquetá",pos:"CM",club:"West Ham",age:27,rating:84},
     {name:"Raphinha",pos:"RW",club:"Barcelona",age:28,rating:85},
     {name:"Vinícius Jr",pos:"LW",club:"Real Madrid",age:24,rating:91},
     {name:"Rodrygo",pos:"ST",club:"Real Madrid",age:24,rating:85},
     {name:"Endrick",pos:"ST",club:"Real Madrid",age:18,rating:79},
     {name:"Éder Militão",pos:"CB",club:"Real Madrid",age:27,rating:85},
-    {name:"Antony",pos:"RW",club:"Manchester United",age:24,rating:79},
+    {name:"Casemiro",pos:"DM",club:"Manchester United",age:33,rating:83},
     {name:"Gabriel Jesus",pos:"ST",club:"Arsenal",age:27,rating:81},
+    {name:"Antony",pos:"RW",club:"Manchester United",age:24,rating:79},
+    {name:"Wendell",pos:"LB",club:"Porto",age:30,rating:78},
   ],
   "Spain":[
     {name:"Unai Simón",pos:"GK",club:"Athletic Bilbao",age:27,rating:83},
     {name:"Dani Carvajal",pos:"RB",club:"Real Madrid",age:33,rating:85},
-    {name:"Aymeric Laporte",pos:"CB",club:"Al-Nassr",age:31,rating:84},
     {name:"Pau Cubarsí",pos:"CB",club:"Barcelona",age:18,rating:82},
+    {name:"Aymeric Laporte",pos:"CB",club:"Al-Nassr",age:31,rating:84},
     {name:"Alejandro Grimaldo",pos:"LB",club:"Bayer Leverkusen",age:29,rating:84},
     {name:"Rodri",pos:"DM",club:"Manchester City",age:29,rating:91},
     {name:"Pedri",pos:"CM",club:"Barcelona",age:23,rating:88},
     {name:"Fabián Ruiz",pos:"CM",club:"PSG",age:28,rating:83},
     {name:"Lamine Yamal",pos:"RW",club:"Barcelona",age:18,rating:88},
-    {name:"Álvaro Morata",pos:"ST",club:"Atlético Madrid",age:33,rating:82},
     {name:"Nico Williams",pos:"LW",club:"Athletic Bilbao",age:22,rating:85},
-    {name:"David Raya",pos:"GK",club:"Arsenal",age:29,rating:83},
+    {name:"Álvaro Morata",pos:"ST",club:"Atlético Madrid",age:33,rating:82},
     {name:"Dani Olmo",pos:"CAM",club:"Barcelona",age:27,rating:85},
     {name:"Martín Zubimendi",pos:"DM",club:"Real Sociedad",age:26,rating:83},
     {name:"Mikel Oyarzabal",pos:"LW",club:"Real Sociedad",age:28,rating:82},
+    {name:"David Raya",pos:"GK",club:"Arsenal",age:29,rating:83},
   ],
   "Germany":[
     {name:"Manuel Neuer",pos:"GK",club:"Bayern Munich",age:40,rating:83},
     {name:"Joshua Kimmich",pos:"DM",club:"Bayern Munich",age:31,rating:87},
     {name:"Antonio Rüdiger",pos:"CB",club:"Real Madrid",age:32,rating:85},
     {name:"Jonathan Tah",pos:"CB",club:"Bayern Munich",age:29,rating:83},
-    {name:"Maximilian Mittelstädt",pos:"LB",club:"Stuttgart",age:27,rating:81},
-    {name:"Toni Kroos",pos:"CM",club:"Real Madrid",age:36,rating:87},
     {name:"Florian Wirtz",pos:"CAM",club:"Bayer Leverkusen",age:22,rating:89},
-    {name:"Leroy Sané",pos:"RW",club:"Bayern Munich",age:29,rating:85},
-    {name:"Kai Havertz",pos:"ST",club:"Arsenal",age:26,rating:84},
     {name:"Jamal Musiala",pos:"LW",club:"Bayern Munich",age:22,rating:88},
+    {name:"Kai Havertz",pos:"ST",club:"Arsenal",age:26,rating:84},
+    {name:"Leroy Sané",pos:"RW",club:"Bayern Munich",age:29,rating:85},
+    {name:"Toni Kroos",pos:"CM",club:"Real Madrid",age:36,rating:87},
     {name:"Marc-André ter Stegen",pos:"GK",club:"Barcelona",age:33,rating:87},
     {name:"Ilkay Gündogan",pos:"CM",club:"Barcelona",age:35,rating:83},
     {name:"Niklas Süle",pos:"CB",club:"Dortmund",age:30,rating:81},
     {name:"Thomas Müller",pos:"CAM",club:"Bayern Munich",age:36,rating:80},
+    {name:"Maximilian Mittelstädt",pos:"LB",club:"Stuttgart",age:27,rating:81},
     {name:"Deniz Undav",pos:"ST",club:"Stuttgart",age:28,rating:80},
   ],
   "Portugal":[
@@ -175,67 +185,35 @@ const SQUADS = {
     {name:"Nuno Mendes",pos:"LB",club:"PSG",age:23,rating:84},
     {name:"João Palhinha",pos:"DM",club:"Bayern Munich",age:30,rating:84},
     {name:"Bernardo Silva",pos:"CM",club:"Manchester City",age:30,rating:88},
-    {name:"Vitinha",pos:"CM",club:"PSG",age:25,rating:83},
-    {name:"Pedro Neto",pos:"RW",club:"Chelsea",age:25,rating:83},
+    {name:"Bruno Fernandes",pos:"CAM",club:"Manchester United",age:31,rating:87},
     {name:"Cristiano Ronaldo",pos:"ST",club:"Al-Nassr",age:41,rating:84},
     {name:"Rafael Leão",pos:"LW",club:"AC Milan",age:25,rating:86},
-    {name:"Bruno Fernandes",pos:"CAM",club:"Manchester United",age:31,rating:87},
+    {name:"Pedro Neto",pos:"RW",club:"Chelsea",age:25,rating:83},
+    {name:"Vitinha",pos:"CM",club:"PSG",age:25,rating:83},
     {name:"João Félix",pos:"CAM",club:"Chelsea",age:26,rating:83},
     {name:"Gonçalo Ramos",pos:"ST",club:"PSG",age:24,rating:82},
-    {name:"Pepe",pos:"CB",club:"Porto",age:43,rating:76},
     {name:"Rui Patrício",pos:"GK",club:"AS Roma",age:38,rating:80},
-  ],
-  "Netherlands":[
-    {name:"Bart Verbruggen",pos:"GK",club:"Brighton",age:22,rating:82},
-    {name:"Denzel Dumfries",pos:"RB",club:"Inter Milan",age:28,rating:83},
-    {name:"Virgil van Dijk",pos:"CB",club:"Liverpool",age:34,rating:87},
-    {name:"Stefan de Vrij",pos:"CB",club:"Inter Milan",age:33,rating:82},
-    {name:"Nathan Aké",pos:"LB",club:"Manchester City",age:30,rating:83},
-    {name:"Frenkie de Jong",pos:"DM",club:"Barcelona",age:28,rating:86},
-    {name:"Tijjani Reijnders",pos:"CM",club:"AC Milan",age:26,rating:83},
-    {name:"Teun Koopmeiners",pos:"CM",club:"Juventus",age:27,rating:84},
-    {name:"Cody Gakpo",pos:"LW",club:"Liverpool",age:25,rating:84},
-    {name:"Memphis Depay",pos:"ST",club:"Atlético Madrid",age:31,rating:82},
-    {name:"Donyell Malen",pos:"RW",club:"Dortmund",age:26,rating:82},
-    {name:"Xavi Simons",pos:"CAM",club:"RB Leipzig",age:22,rating:83},
-    {name:"Ryan Gravenberch",pos:"CM",club:"Liverpool",age:22,rating:83},
-    {name:"Wout Weghorst",pos:"ST",club:"Hoffenheim",age:32,rating:79},
+    {name:"Pepe",pos:"CB",club:"Porto",age:43,rating:76},
   ],
   "Morocco":[
     {name:"Yassine Bounou",pos:"GK",club:"Al-Hilal",age:33,rating:84},
     {name:"Achraf Hakimi",pos:"RB",club:"PSG",age:26,rating:87},
     {name:"Nayef Aguerd",pos:"CB",club:"West Ham",age:28,rating:82},
-    {name:"Jawad El Yamiq",pos:"CB",club:"Real Valladolid",age:32,rating:79},
     {name:"Noussair Mazraoui",pos:"LB",club:"Manchester United",age:27,rating:82},
     {name:"Sofyan Amrabat",pos:"DM",club:"Manchester United",age:28,rating:82},
-    {name:"Azzedine Ounahi",pos:"CM",club:"OM Marseille",age:24,rating:80},
     {name:"Hakim Ziyech",pos:"RW",club:"Galatasaray",age:32,rating:82},
     {name:"Youssef En-Nesyri",pos:"ST",club:"Fenerbahçe",age:27,rating:82},
     {name:"Sofiane Boufal",pos:"LW",club:"Southampton",age:30,rating:79},
+    {name:"Azzedine Ounahi",pos:"CM",club:"OM Marseille",age:24,rating:80},
+    {name:"Jawad El Yamiq",pos:"CB",club:"Real Valladolid",age:32,rating:79},
     {name:"Bono",pos:"GK",club:"Sevilla",age:33,rating:82},
     {name:"Ilias Chair",pos:"CAM",club:"Leicester City",age:27,rating:78},
     {name:"Ibrahim Diaz",pos:"LW",club:"Real Sociedad",age:23,rating:78},
     {name:"Selim Amallah",pos:"CM",club:"Sevilla",age:27,rating:78},
   ],
-  "Japan":[
-    {name:"Shuichi Gonda",pos:"GK",club:"Shimizu S-Pulse",age:34,rating:79},
-    {name:"Hiroki Sakai",pos:"RB",club:"Urawa Red Diamonds",age:34,rating:79},
-    {name:"Maya Yoshida",pos:"CB",club:"FC Machida Zelvia",age:36,rating:78},
-    {name:"Ko Itakura",pos:"CB",club:"Borussia M'gladbach",age:27,rating:81},
-    {name:"Yuto Nagatomo",pos:"LB",club:"FC Tokyo",age:38,rating:76},
-    {name:"Wataru Endo",pos:"DM",club:"Liverpool",age:31,rating:81},
-    {name:"Hidemasa Morita",pos:"CM",club:"Sporting CP",age:30,rating:80},
-    {name:"Kaoru Mitoma",pos:"LW",club:"Brighton",age:27,rating:83},
-    {name:"Takumi Minamino",pos:"CM",club:"Monaco",age:30,rating:81},
-    {name:"Daichi Kamada",pos:"CAM",club:"Crystal Palace",age:28,rating:82},
-    {name:"Ritsu Doan",pos:"RW",club:"Freiburg",age:26,rating:81},
-    {name:"Ayase Ueda",pos:"ST",club:"Feyenoord",age:25,rating:79},
-    {name:"Yukinari Sugawara",pos:"RB",club:"Southampton",age:23,rating:78},
-    {name:"Takehiro Tomiyasu",pos:"CB",club:"Arsenal",age:26,rating:80},
-  ],
 };
 
-// ── SIMULATION ENGINE ──────────────────────────────────────────────────────────
+// ── SIMULATION ────────────────────────────────────────────────────────────────
 function poisson(λ){const L=Math.exp(-λ);let p=1,k=0;do{k++;p*=Math.random();}while(p>L);return k-1;}
 function eloWin(a,b){return 1/(1+Math.pow(10,-(a.elo-b.elo)/400));}
 function simGroup(group){
@@ -243,7 +221,7 @@ function simGroup(group){
   for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
     const p1=eloWin(group[i],group[j]);
     const eq=Math.max(0,1-Math.abs(group[i].elo-group[j].elo)/900);
-    const pD=0.10+0.20*eq,pW=( 1-pD)*p1,r=Math.random();
+    const pD=0.10+0.20*eq,pW=(1-pD)*p1,r=Math.random();
     const g1=poisson(2.5*p1),g2=poisson(2.5*(1-p1));
     if(r<pW){st[i].gf+=Math.max(g1,g2+1);st[i].ga+=g2;st[j].gf+=g2;st[j].ga+=Math.max(g1,g2+1);st[i].pts+=3;}
     else if(r<pW+pD){const g=Math.round((g1+g2)/2);st[i].gf+=g;st[i].ga+=g;st[j].gf+=g;st[j].ga+=g;st[i].pts+=1;st[j].pts+=1;}
@@ -261,8 +239,8 @@ function runSim(stats){
   const q=gRes.flatMap(g=>[g[0].team,g[1].team]);
   const thirds=gRes.map(g=>g[2]).sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
   let round=shuffle([...q,...thirds.slice(0,8).map(t=>t.team)]);
-  round.forEach(t=>{stats[t.name].r32++;});
-  function runRound(r){const n=[];for(let i=0;i<r.length;i+=2){const w=simKO(r[i],r[i+1]);stats[w.name][["r16","qf","sf","f"][Math.log2(r.length)-2]]++;n.push(w);}return n;}
+  round.forEach(t=>stats[t.name].r32++);
+  function runRound(r){const n=[];for(let i=0;i<r.length;i+=2){const w=simKO(r[i],r[i+1]);const key=["r16","qf","sf","f"][Math.log2(r.length)-2];stats[w.name][key]++;n.push(w);}return n;}
   round=runRound(round);round=runRound(round);round=runRound(round);
   const[f1,f2]=[round[0],round[1]];
   stats[f1.name].fn++;stats[f2.name].fn++;
@@ -270,11 +248,10 @@ function runSim(stats){
 }
 function mkStats(){const s={};TEAMS.forEach(t=>{s[t.name]={w:0,fn:0,sf:0,qf:0,r16:0,r32:0};});return s;}
 
-// ── CLAUDE API ──────────────────────────────────────────────────────────────────
+// ── API ───────────────────────────────────────────────────────────────────────
 const ANTHROPIC_KEY = import.meta.env.VITE_ANTHROPIC_API_KEY || "";
-
 async function callClaude(userPrompt,systemPrompt="",useSearch=false){
-  if(!ANTHROPIC_KEY) throw new Error("API key missing — add VITE_ANTHROPIC_API_KEY to your .env file");
+  if(!ANTHROPIC_KEY)throw new Error("API key not configured.");
   const body={model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:userPrompt}]};
   if(systemPrompt)body.system=systemPrompt;
   if(useSearch)body.tools=[{type:"web_search_20250305",name:"web_search"}];
@@ -284,243 +261,270 @@ async function callClaude(userPrompt,systemPrompt="",useSearch=false){
   return data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
 }
 
+// ── SHARED UI PRIMITIVES ──────────────────────────────────────────────────────
+function Tag({children,color}){
+  return(
+    <span style={{...body,fontSize:10,fontWeight:600,letterSpacing:.8,padding:"2px 7px",borderRadius:4,background:color+"18",color,textTransform:"uppercase",display:"inline-block"}}>
+      {children}
+    </span>
+  );
+}
+function Card({children,style={},onClick}){
+  return(
+    <div onClick={onClick} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:12,padding:"18px 20px",transition:"box-shadow .15s",...style}}>
+      {children}
+    </div>
+  );
+}
+function Label({children}){
+  return <div style={{...body,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:8}}>{children}</div>;
+}
+function RedBtn({children,onClick,disabled,fullWidth}){
+  return(
+    <button onClick={onClick} disabled={disabled} style={{...heading,fontWeight:700,fontSize:14,letterSpacing:.3,padding:"11px 24px",borderRadius:8,border:"none",background:disabled?T.redMid:T.red,color:"#fff",cursor:disabled?"not-allowed":"pointer",width:fullWidth?"100%":"auto",transition:"opacity .15s",opacity:disabled?.7:1}}>
+      {children}
+    </button>
+  );
+}
+function OutlineBtn({children,onClick,active}){
+  return(
+    <button onClick={onClick} style={{...body,fontSize:12,fontWeight:500,padding:"5px 13px",borderRadius:6,border:`1px solid ${active?T.red:T.border}`,background:active?T.redLight:"transparent",color:active?T.red:T.muted,cursor:"pointer",transition:"all .15s"}}>
+      {children}
+    </button>
+  );
+}
+function Divider(){return <div style={{height:1,background:T.border,margin:"20px 0"}} />;}
 
-// ── SHARED STYLES ──────────────────────────────────────────────────────────────
-const S = {
-  card:{background:"#0d0d20",border:"1px solid rgba(255,255,255,0.07)",borderRadius:10,padding:"16px 18px"},
-  tag:(conf)=>({fontSize:9,padding:"2px 6px",borderRadius:3,background:(CC[conf]||"#888")+"22",color:CC[conf]||"#888",fontFamily:"'Space Mono',monospace",letterSpacing:0.5,textTransform:"uppercase"}),
-  btn:(active,color=ACCENT)=>({padding:"6px 14px",borderRadius:5,border:`1px solid ${active?color:rgba(255,255,255,0.1)}`,background:active?color+"22":"transparent",color:active?color:"#888",fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:0.5,transition:"all .2s"}),
-  label:{fontFamily:"'Space Mono',monospace",fontSize:9,letterSpacing:2,color:"#555",textTransform:"uppercase"},
-  mono:{fontFamily:"'Space Mono',monospace"},
-};
-function rgba(r,g,b,a){return`rgba(${r},${g},${b},${a})`;}
-
-// ── NAV ────────────────────────────────────────────────────────────────────────
+// ── NAV ───────────────────────────────────────────────────────────────────────
 const TABS=[
-  {id:"home",label:"Overview",icon:"◉"},
-  {id:"teams",label:"Teams",icon:"▦"},
-  {id:"sim",label:"Simulator",icon:"⟳"},
-  {id:"predictor",label:"Predictor",icon:"⚡"},
-  {id:"lineups",label:"Lineups",icon:"◈"},
-  {id:"news",label:"News",icon:"◎"},
+  {id:"home",label:"Overview"},
+  {id:"teams",label:"Teams"},
+  {id:"sim",label:"Simulator"},
+  {id:"predictor",label:"Predictor"},
+  {id:"lineups",label:"Lineups"},
+  {id:"news",label:"News"},
 ];
 function Nav({tab,setTab}){
   return(
-    <nav style={{background:"#0a0a1a",borderBottom:"1px solid rgba(255,255,255,0.06)",position:"sticky",top:0,zIndex:100,display:"flex",alignItems:"center",gap:0,overflowX:"auto",padding:"0 8px"}}>
-      <div style={{fontSize:22,fontWeight:800,letterSpacing:1,padding:"0 16px 0 8px",color:ACCENT,whiteSpace:"nowrap",flexShrink:0}}>
-        WC<span style={{color:"#fff"}}>26</span>
+    <nav style={{background:T.surface,borderBottom:`1px solid ${T.border}`,position:"sticky",top:0,zIndex:100,display:"flex",alignItems:"stretch",overflowX:"auto",paddingLeft:24}}>
+      <div style={{...heading,fontWeight:800,fontSize:20,color:T.red,display:"flex",alignItems:"center",paddingRight:28,borderRight:`1px solid ${T.border}`,marginRight:8,flexShrink:0,letterSpacing:-.5}}>
+        WC<span style={{color:T.ink}}>26</span>
       </div>
       {TABS.map(t=>(
         <button key={t.id} onClick={()=>setTab(t.id)} style={{
-          padding:"16px 14px",border:"none",background:"transparent",
-          color:tab===t.id?"#fff":"#555",
-          fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:700,
-          letterSpacing:0.5,whiteSpace:"nowrap",
-          borderBottom:tab===t.id?`2px solid ${ACCENT}`:"2px solid transparent",
-          transition:"all .2s",
+          ...body,fontWeight:500,fontSize:14,
+          padding:"0 16px",border:"none",background:"transparent",
+          color:tab===t.id?T.red:T.muted,
+          borderBottom:tab===t.id?`2px solid ${T.red}`:"2px solid transparent",
+          cursor:"pointer",whiteSpace:"nowrap",transition:"color .15s",flexShrink:0,
         }}>
-          <span style={{marginRight:5,fontSize:12}}>{t.icon}</span>{t.label}
+          {t.label}
         </button>
       ))}
     </nav>
   );
 }
 
-// ── OVERVIEW SECTION ───────────────────────────────────────────────────────────
+// ── PAGE WRAPPER ──────────────────────────────────────────────────────────────
+function Page({children}){
+  return <div style={{maxWidth:1060,margin:"0 auto",padding:"32px 20px 80px"}}>{children}</div>;
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────────────
 function HomeSection({setTab}){
   const [results,setResults]=useState(null);
   useEffect(()=>{
     const stats=mkStats();let done=0;
-    function batch(){const end=Math.min(done+500,5000);while(done<end){runSim(stats);done++;}
+    function batch(){const end=Math.min(done+600,5000);while(done<end){runSim(stats);done++;}
       if(done<5000)setTimeout(batch,10);
       else{const r=TEAMS.map(t=>({...t,...stats[t.name],winPct:stats[t.name].w/50,finalPct:stats[t.name].fn/50})).sort((a,b)=>b.w-a.w);setResults(r);}
     }
     setTimeout(batch,50);
   },[]);
 
-  const venues=[{city:"New York/New Jersey",stadium:"MetLife Stadium",cap:82500,country:"USA"},
-    {city:"Los Angeles",stadium:"SoFi Stadium",cap:70240,country:"USA"},
-    {city:"Dallas",stadium:"AT&T Stadium",cap:80000,country:"USA"},
-    {city:"San Francisco",stadium:"Levi's Stadium",cap:68500,country:"USA"},
-    {city:"Miami",stadium:"Hard Rock Stadium",cap:65326,country:"USA"},
-    {city:"Seattle",stadium:"Lumen Field",cap:72000,country:"USA"},
-    {city:"Boston",stadium:"Gillette Stadium",cap:65878,country:"USA"},
-    {city:"Houston",stadium:"NRG Stadium",cap:72220,country:"USA"},
-    {city:"Kansas City",stadium:"Arrowhead Stadium",cap:76416,country:"USA"},
-    {city:"Atlanta",stadium:"Mercedes-Benz Stadium",cap:75000,country:"USA"},
-    {city:"Philadelphia",stadium:"Lincoln Financial Field",cap:69796,country:"USA"},
-    {city:"Vancouver",stadium:"BC Place",cap:54500,country:"Canada"},
-    {city:"Toronto",stadium:"BMO Field",cap:30990,country:"Canada"},
-    {city:"Guadalajara",stadium:"Estadio Akron",cap:49850,country:"Mexico"},
-    {city:"Mexico City",stadium:"Estadio Azteca",cap:87523,country:"Mexico"},
-    {city:"Monterrey",stadium:"Estadio BBVA",cap:53500,country:"Mexico"},
-  ];
-
   return(
-    <div style={{maxWidth:1100,margin:"0 auto",padding:"24px 16px 80px"}}>
-      {/* Hero */}
-      <div style={{background:"linear-gradient(135deg,#0d1a2e 0%,#0a0a1a 60%)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:14,padding:"40px 32px",marginBottom:24,position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",top:0,right:0,width:300,height:"100%",background:`radial-gradient(ellipse at 80% 50%, ${ACCENT}08, transparent 70%)`,pointerEvents:"none"}} />
-        <div style={{...S.label,marginBottom:12,color:ACCENT}}>FIFA World Cup 2026 · June 11 – July 19</div>
-        <h1 style={{fontSize:"clamp(36px,6vw,72px)",fontWeight:800,letterSpacing:2,lineHeight:1,textTransform:"uppercase",color:"#fff"}}>
-          The Biggest<br/><span style={{color:ACCENT}}>World Cup</span><br/>in History
+    <Page>
+      {/* Hero strip */}
+      <div style={{borderBottom:`1px solid ${T.border}`,paddingBottom:28,marginBottom:32}}>
+        <div style={{...body,fontSize:11,fontWeight:600,letterSpacing:2,color:T.red,textTransform:"uppercase",marginBottom:12}}>June 11 – July 19, 2026 · USA · Canada · Mexico</div>
+        <h1 style={{...heading,fontSize:"clamp(40px,7vw,80px)",fontWeight:800,lineHeight:1,letterSpacing:-2,color:T.ink,marginBottom:16}}>
+          FIFA World Cup<br/><span style={{color:T.red}}>2026 Hub</span>
         </h1>
-        <p style={{marginTop:16,color:"#888",fontSize:15,maxWidth:500,lineHeight:1.6}}>
-          48 teams. 16 venues across USA, Canada & Mexico. 104 matches. The most expanded edition of the tournament ever — with AI-powered analysis, simulations, and live predictions.
+        <p style={{...body,fontSize:16,color:T.muted,maxWidth:560,lineHeight:1.6,marginBottom:24}}>
+          The most complete analytical resource for the biggest World Cup in history. Simulations, team data, AI predictions — all in one place.
         </p>
-        <div style={{display:"flex",gap:24,marginTop:24,flexWrap:"wrap"}}>
-          {[["48","Qualified Teams"],["16","Host Venues"],["104","Total Matches"],["3","Host Nations"]].map(([n,l])=>(
+        <div style={{display:"flex",gap:32,flexWrap:"wrap"}}>
+          {[["48","Teams"],["16","Venues"],["104","Matches"],["3","Host nations"]].map(([n,l])=>(
             <div key={l}>
-              <div style={{fontSize:32,fontWeight:800,color:ACCENT,lineHeight:1}}>{n}</div>
-              <div style={{fontSize:11,color:"#666",...S.mono,marginTop:2}}>{l}</div>
+              <div style={{...heading,fontSize:36,fontWeight:800,color:T.ink,lineHeight:1}}>{n}</div>
+              <div style={{...body,fontSize:12,color:T.muted,marginTop:2}}>{l}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Favourites */}
-      <div style={{marginBottom:24}}>
-        <div style={{...S.label,marginBottom:14}}>Tournament favourites — 5,000 simulated scenarios</div>
-        {!results?
-          <div style={{...S.card,color:"#555",...S.mono,fontSize:12}}>Running quick simulation…</div>:
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(180px,1fr))",gap:12}}>
+      <div style={{marginBottom:40}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:20}}>
+          <h2 style={{...heading,fontSize:22,fontWeight:800,color:T.ink,letterSpacing:-.5}}>Tournament favourites</h2>
+          <span style={{...body,fontSize:12,color:T.faint}}>5,000 simulated scenarios</span>
+        </div>
+        {!results?(
+          <div style={{...body,fontSize:13,color:T.faint,padding:"40px 0",textAlign:"center"}}>Running simulations…</div>
+        ):(
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(170px,1fr))",gap:12}}>
             {results.slice(0,8).map((t,i)=>(
-              <div key={t.name} style={{...S.card,cursor:"pointer",transition:"border-color .2s",borderColor:i===0?ACCENT+"44":"rgba(255,255,255,0.07)"}} onClick={()=>setTab("sim")}>
+              <Card key={t.name} onClick={()=>setTab("sim")} style={{cursor:"pointer",borderColor:i===0?T.redMid:T.border}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-                  <span style={{fontSize:28}}>{t.flag}</span>
-                  <span style={{...S.mono,fontSize:11,color:i===0?ACCENT:"#777"}}>#{i+1}</span>
+                  <span style={{fontSize:32}}>{t.flag}</span>
+                  <span style={{...body,fontSize:11,fontWeight:600,color:i===0?T.red:T.faint}}>#{i+1}</span>
                 </div>
-                <div style={{fontSize:18,fontWeight:700}}>{t.name}</div>
-                <div style={{...S.tag(t.conf),display:"inline-block",marginTop:4}}>{t.conf}</div>
-                <div style={{marginTop:12,fontSize:28,fontWeight:800,color:i===0?ACCENT:"#ccc",lineHeight:1}}>{t.winPct.toFixed(1)}<span style={{fontSize:14,color:"#555"}}>%</span></div>
-                <div style={{fontSize:10,...S.mono,color:"#555",marginTop:2}}>win probability</div>
-              </div>
+                <div style={{...heading,fontSize:16,fontWeight:700,color:T.ink,marginBottom:4}}>{t.name}</div>
+                <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
+                <div style={{marginTop:12,display:"flex",alignItems:"baseline",gap:4}}>
+                  <span style={{...heading,fontSize:28,fontWeight:800,color:i===0?T.red:T.ink,lineHeight:1}}>{t.winPct.toFixed(1)}</span>
+                  <span style={{...body,fontSize:12,color:T.faint}}>% win</span>
+                </div>
+              </Card>
             ))}
           </div>
-        }
+        )}
       </div>
 
-      {/* Section cards */}
-      <div style={{...S.label,marginBottom:14}}>Explore the hub</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))",gap:12}}>
-        {[
-          {id:"teams",icon:"▦",title:"Team Database",desc:"Full squads, ratings & stats for all 48 qualified nations"},
-          {id:"sim",icon:"⟳",title:"Monte Carlo Sim",desc:"Run 25,000 full tournament scenarios with Elo-Poisson model"},
-          {id:"predictor",icon:"⚡",title:"Match Predictor",desc:"AI-powered head-to-head analysis with tactical breakdown"},
-          {id:"lineups",icon:"◈",title:"Lineup Predictor",desc:"Predicted starting XI with injury & form data from live news"},
-          {id:"news",icon:"◎",title:"News Feed",desc:"Latest World Cup 2026 news with AI-sourced summaries"},
-        ].map(s=>(
-          <div key={s.id} style={{...S.card,cursor:"pointer",transition:"all .2s"}} onClick={()=>setTab(s.id)}
-            onMouseEnter={e=>{e.currentTarget.style.borderColor=ACCENT+"44";e.currentTarget.style.background="#111128";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.07)";e.currentTarget.style.background="#0d0d20";}}>
-            <div style={{fontSize:24,marginBottom:10,color:ACCENT}}>{s.icon}</div>
-            <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>{s.title}</div>
-            <div style={{fontSize:13,color:"#666",lineHeight:1.5}}>{s.desc}</div>
-          </div>
-        ))}
+      {/* Section grid */}
+      <div style={{marginBottom:40}}>
+        <h2 style={{...heading,fontSize:22,fontWeight:800,color:T.ink,letterSpacing:-.5,marginBottom:20}}>Explore</h2>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:12}}>
+          {[
+            {id:"teams",label:"Team Database",desc:"Squads, ratings & stats for all 48 nations"},
+            {id:"sim",label:"Monte Carlo Sim",desc:"25,000 full tournament simulations"},
+            {id:"predictor",label:"Match Predictor",desc:"AI head-to-head analysis — coming soon"},
+            {id:"lineups",label:"Lineup Predictor",desc:"Predicted XIs with injury data — coming soon"},
+            {id:"news",label:"News Feed",desc:"AI-powered tournament news — coming soon"},
+          ].map(s=>(
+            <Card key={s.id} onClick={()=>setTab(s.id)} style={{cursor:"pointer"}}>
+              <div style={{...heading,fontSize:15,fontWeight:700,color:T.ink,marginBottom:6}}>{s.label}</div>
+              <div style={{...body,fontSize:13,color:T.muted,lineHeight:1.5}}>{s.desc}</div>
+            </Card>
+          ))}
+        </div>
       </div>
 
       {/* Venues */}
-      <div style={{marginTop:32}}>
-        <div style={{...S.label,marginBottom:14}}>Host Venues</div>
+      <div>
+        <h2 style={{...heading,fontSize:22,fontWeight:800,color:T.ink,letterSpacing:-.5,marginBottom:20}}>Host venues</h2>
         <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(200px,1fr))",gap:8}}>
-          {venues.map(v=>(
-            <div key={v.city} style={{background:"#0a0a1a",border:"1px solid rgba(255,255,255,0.05)",borderRadius:8,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          {[
+            {city:"New York / New Jersey",stadium:"MetLife Stadium",cap:"82,500",country:"USA"},
+            {city:"Los Angeles",stadium:"SoFi Stadium",cap:"70,240",country:"USA"},
+            {city:"Dallas",stadium:"AT&T Stadium",cap:"80,000",country:"USA"},
+            {city:"San Francisco",stadium:"Levi's Stadium",cap:"68,500",country:"USA"},
+            {city:"Miami",stadium:"Hard Rock Stadium",cap:"65,326",country:"USA"},
+            {city:"Seattle",stadium:"Lumen Field",cap:"72,000",country:"USA"},
+            {city:"Boston",stadium:"Gillette Stadium",cap:"65,878",country:"USA"},
+            {city:"Houston",stadium:"NRG Stadium",cap:"72,220",country:"USA"},
+            {city:"Kansas City",stadium:"Arrowhead Stadium",cap:"76,416",country:"USA"},
+            {city:"Atlanta",stadium:"Mercedes-Benz Stadium",cap:"75,000",country:"USA"},
+            {city:"Philadelphia",stadium:"Lincoln Financial Field",cap:"69,796",country:"USA"},
+            {city:"Vancouver",stadium:"BC Place",cap:"54,500",country:"Canada"},
+            {city:"Toronto",stadium:"BMO Field",cap:"30,990",country:"Canada"},
+            {city:"Guadalajara",stadium:"Estadio Akron",cap:"49,850",country:"Mexico"},
+            {city:"Mexico City",stadium:"Estadio Azteca",cap:"87,523",country:"Mexico"},
+            {city:"Monterrey",stadium:"Estadio BBVA",cap:"53,500",country:"Mexico"},
+          ].map(v=>(
+            <div key={v.city} style={{background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,padding:"12px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
               <div>
-                <div style={{fontSize:13,fontWeight:600}}>{v.city}</div>
-                <div style={{fontSize:11,color:"#555",marginTop:2}}>{v.stadium}</div>
+                <div style={{...body,fontSize:13,fontWeight:600,color:T.ink}}>{v.city}</div>
+                <div style={{...body,fontSize:11,color:T.faint,marginTop:2}}>{v.stadium}</div>
               </div>
               <div style={{textAlign:"right"}}>
-                <div style={{fontSize:12,...S.mono,color:ACCENT}}>{(v.cap/1000).toFixed(0)}k</div>
-                <div style={{fontSize:10,color:"#444"}}>{v.country}</div>
+                <div style={{...heading,fontSize:13,fontWeight:700,color:T.red}}>{v.cap}</div>
+                <div style={{...body,fontSize:10,color:T.faint}}>{v.country}</div>
               </div>
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
 
-// ── TEAMS SECTION ──────────────────────────────────────────────────────────────
+// ── TEAMS ─────────────────────────────────────────────────────────────────────
 function TeamsSection(){
   const [search,setSearch]=useState("");
   const [conf,setConf]=useState("ALL");
   const [selected,setSelected]=useState(null);
   const filtered=TEAMS.filter(t=>(conf==="ALL"||t.conf===conf)&&t.name.toLowerCase().includes(search.toLowerCase()));
+  const posOrder=["GK","RB","CB","LB","DM","CM","CAM","AM","RW","LW","ST","CF"];
+  const posColor={"GK":"#D97706","CB":"#2563EB","RB":"#2563EB","LB":"#2563EB","DM":"#16A34A","CM":"#16A34A","CAM":"#C84B31","AM":"#C84B31","RW":"#7C3AED","LW":"#7C3AED","ST":"#C84B31","CF":"#C84B31"};
   const squad=selected?SQUADS[selected.name]:null;
-  const posOrder=["GK","RB","CB","LB","DM","CM","CAM","RW","LW","AM","ST","CF"];
   const sorted=squad?[...squad].sort((a,b)=>posOrder.indexOf(a.pos)-posOrder.indexOf(b.pos)):[];
-  const posCols={"GK":"#FF6D00","CB":"#4A90E2","RB":"#4A90E2","LB":"#4A90E2","DM":"#7ED321","CM":"#7ED321","CAM":"#F5A623","AM":"#F5A623","RW":"#E91E63","LW":"#E91E63","ST":"#E91E63","CF":"#E91E63"};
 
   return(
-    <div style={{maxWidth:1100,margin:"0 auto",padding:"24px 16px 80px"}}>
-      <div style={{display:"flex",gap:12,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
+    <Page>
+      <div style={{display:"flex",gap:10,marginBottom:20,flexWrap:"wrap",alignItems:"center"}}>
         <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search teams…"
-          style={{padding:"8px 14px",borderRadius:6,border:"1px solid rgba(255,255,255,0.1)",background:"#0d0d20",color:"#e8e8f0",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,flex:"1 1 200px",outline:"none"}} />
-        {["ALL",...Object.keys(CC)].map(c=>(
-          <button key={c} onClick={()=>setConf(c)} style={{...S.btn(conf===c,CC[c]||ACCENT),flexShrink:0}}>{c}</button>
+          style={{...body,padding:"8px 14px",borderRadius:7,border:`1px solid ${T.border}`,background:T.surface,color:T.ink,fontSize:14,flex:"1 1 200px",outline:"none"}} />
+        {["ALL","UEFA","CONMEBOL","CAF","AFC","CONCACAF"].map(c=>(
+          <OutlineBtn key={c} active={conf===c} onClick={()=>setConf(c)}>{c}</OutlineBtn>
         ))}
       </div>
 
-      <div style={{...S.label,marginBottom:12}}>{filtered.length} teams</div>
+      <div style={{...body,fontSize:11,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",marginBottom:14}}>{filtered.length} teams</div>
 
-      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(160px,1fr))",gap:10}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(155px,1fr))",gap:10,marginBottom:selected?32:0}}>
         {filtered.map(t=>(
-          <div key={t.name} onClick={()=>setSelected(selected?.name===t.name?null:t)} style={{
-            ...S.card,cursor:"pointer",transition:"all .2s",
-            borderColor:selected?.name===t.name?ACCENT+"66":"rgba(255,255,255,0.07)",
-            background:selected?.name===t.name?"#111128":"#0d0d20",
-          }}>
-            <div style={{fontSize:32,marginBottom:8}}>{t.flag}</div>
-            <div style={{fontSize:14,fontWeight:700}}>{t.name}</div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:6}}>
-              <span style={S.tag(t.conf)}>{t.conf}</span>
-              <span style={{...S.mono,fontSize:10,color:"#555"}}>Elo {t.elo}</span>
+          <Card key={t.name} onClick={()=>setSelected(selected?.name===t.name?null:t)}
+            style={{cursor:"pointer",borderColor:selected?.name===t.name?T.red:T.border,background:selected?.name===t.name?T.redLight:T.surface}}>
+            <div style={{fontSize:30,marginBottom:8}}>{t.flag}</div>
+            <div style={{...heading,fontSize:14,fontWeight:700,color:T.ink,marginBottom:5}}>{t.name}</div>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
+              <span style={{...body,fontSize:10,color:T.faint}}>{t.elo}</span>
             </div>
-            {SQUADS[t.name]&&<div style={{...S.mono,fontSize:9,color:ACCENT,marginTop:8}}>Squad available</div>}
-          </div>
+            {SQUADS[t.name]&&<div style={{...body,fontSize:10,color:T.red,fontWeight:500,marginTop:8}}>Squad available</div>}
+          </Card>
         ))}
       </div>
 
       {selected&&(
-        <div style={{...S.card,marginTop:24,borderColor:ACCENT+"33"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:20,flexWrap:"wrap",gap:12}}>
+        <Card style={{borderColor:T.redMid}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12,marginBottom:20}}>
             <div style={{display:"flex",gap:16,alignItems:"center"}}>
-              <span style={{fontSize:48}}>{selected.flag}</span>
+              <span style={{fontSize:44}}>{selected.flag}</span>
               <div>
-                <h2 style={{fontSize:32,fontWeight:800,letterSpacing:1}}>{selected.name.toUpperCase()}</h2>
-                <div style={{display:"flex",gap:8,marginTop:4}}>
-                  <span style={S.tag(selected.conf)}>{selected.conf}</span>
-                  <span style={{...S.mono,fontSize:10,color:"#555"}}>Elo Rating: {selected.elo}</span>
+                <h2 style={{...heading,fontSize:28,fontWeight:800,color:T.ink,letterSpacing:-1}}>{selected.name}</h2>
+                <div style={{display:"flex",gap:8,marginTop:4,alignItems:"center"}}>
+                  <Tag color={CC[selected.conf]||T.muted}>{selected.conf}</Tag>
+                  <span style={{...body,fontSize:11,color:T.faint}}>Elo {selected.elo}</span>
                 </div>
               </div>
             </div>
-            <button onClick={()=>setSelected(null)} style={{...S.btn(false),...S.mono,fontSize:11}}>✕ Close</button>
+            <OutlineBtn onClick={()=>setSelected(null)}>Close</OutlineBtn>
           </div>
           {squad?(
             <>
-              <div style={{...S.label,marginBottom:12}}>Squad ({squad.length} players)</div>
+              <Label>Squad — {squad.length} players</Label>
               <div style={{overflowX:"auto"}}>
-                <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}>
+                <table style={{width:"100%",borderCollapse:"collapse",...body,fontSize:13}}>
                   <thead>
-                    <tr style={{borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
-                      {["Position","Name","Club","Age","Rating"].map(h=>(
-                        <th key={h} style={{padding:"8px 12px",textAlign:h==="Rating"?"center":"left",...S.mono,fontSize:10,color:"#555",fontWeight:400,letterSpacing:1}}>{h.toUpperCase()}</th>
+                    <tr style={{borderBottom:`1px solid ${T.border}`}}>
+                      {["Pos","Name","Club","Age","Rating"].map(h=>(
+                        <th key={h} style={{padding:"8px 10px",textAlign:h==="Rating"?"center":"left",fontSize:10,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",fontFamily:"'DM Sans',sans-serif"}}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {sorted.map((p,i)=>(
-                      <tr key={p.name} style={{borderBottom:"1px solid rgba(255,255,255,0.04)",background:i%2===0?"transparent":"rgba(255,255,255,0.01)"}}>
-                        <td style={{padding:"8px 12px"}}>
-                          <span style={{...S.mono,fontSize:10,padding:"2px 6px",borderRadius:3,background:(posCols[p.pos]||"#888")+"22",color:posCols[p.pos]||"#888"}}>{p.pos}</span>
+                      <tr key={p.name} style={{borderBottom:`1px solid ${T.border}`,background:i%2===0?T.surface:"#FAFAF8"}}>
+                        <td style={{padding:"9px 10px"}}>
+                          <Tag color={posColor[p.pos]||T.muted}>{p.pos}</Tag>
                         </td>
-                        <td style={{padding:"8px 12px",fontWeight:600}}>{p.name}</td>
-                        <td style={{padding:"8px 12px",color:"#888"}}>{p.club}</td>
-                        <td style={{padding:"8px 12px",...S.mono,color:"#666",fontSize:12}}>{p.age}</td>
-                        <td style={{padding:"8px 12px",textAlign:"center"}}>
-                          <span style={{...S.mono,fontSize:12,color:p.rating>=88?ACCENT:p.rating>=83?"#F5A623":"#ccc",fontWeight:700}}>{p.rating}</span>
+                        <td style={{padding:"9px 10px",fontWeight:500,color:T.ink}}>{p.name}</td>
+                        <td style={{padding:"9px 10px",color:T.muted}}>{p.club}</td>
+                        <td style={{padding:"9px 10px",color:T.faint}}>{p.age}</td>
+                        <td style={{padding:"9px 10px",textAlign:"center"}}>
+                          <span style={{...heading,fontWeight:700,color:p.rating>=88?T.red:p.rating>=83?"#D97706":T.ink}}>{p.rating}</span>
                         </td>
                       </tr>
                     ))}
@@ -529,161 +533,157 @@ function TeamsSection(){
               </div>
             </>
           ):(
-            <div style={{color:"#555",fontSize:14,padding:"20px 0"}}>Detailed squad data not available for this team yet.</div>
+            <div style={{...body,color:T.faint,fontSize:14,padding:"20px 0"}}>Detailed squad data not available for this team.</div>
           )}
-        </div>
+        </Card>
       )}
-    </div>
+    </Page>
   );
 }
 
-// ── SIMULATOR SECTION ──────────────────────────────────────────────────────────
-const N_SIMS=25000;
+// ── SIMULATOR ─────────────────────────────────────────────────────────────────
+const N=25000;
 function SimulatorSection(){
   const [progress,setProgress]=useState(0);
   const [results,setResults]=useState(null);
-  const [confFilter,setConfFilter]=useState("ALL");
+  const [conf,setConf]=useState("ALL");
   const statsRef=useRef(mkStats());
-  const ranRef=useRef(false);
+  const ran=useRef(false);
 
   useEffect(()=>{
-    if(ranRef.current)return;ranRef.current=true;
+    if(ran.current)return;ran.current=true;
     const stats=statsRef.current;let done=0;
-    function batch(){const end=Math.min(done+500,N_SIMS);while(done<end){runSim(stats);done++;}
+    function batch(){const end=Math.min(done+500,N);while(done<end){runSim(stats);done++;}
       setProgress(done);
-      if(done<N_SIMS)setTimeout(batch,8);
+      if(done<N)setTimeout(batch,8);
       else{
-        const r=TEAMS.map(t=>({...t,...stats[t.name],winPct:stats[t.name].w/N_SIMS*100,finalPct:stats[t.name].fn/N_SIMS*100,sfPct:stats[t.name].sf/N_SIMS*100,qfPct:stats[t.name].qf/N_SIMS*100,r16Pct:stats[t.name].r16/N_SIMS*100})).sort((a,b)=>b.w-a.w);
+        const r=TEAMS.map(t=>({...t,...stats[t.name],winPct:stats[t.name].w/N*100,finalPct:stats[t.name].fn/N*100,sfPct:stats[t.name].sf/N*100,qfPct:stats[t.name].qf/N*100,r16Pct:stats[t.name].r16/N*100})).sort((a,b)=>b.w-a.w);
         setResults(r);
       }
     }
     setTimeout(batch,60);
   },[]);
 
-  const pct=Math.round(progress/N_SIMS*100);
-  const filtered=results?(confFilter==="ALL"?results:results.filter(t=>t.conf===confFilter)):[];
+  const pct=Math.round(progress/N*100);
+  const filtered=results?(conf==="ALL"?results:results.filter(t=>t.conf===conf)):[];
   const maxWin=results?results[0].winPct:1;
 
   return(
-    <div style={{maxWidth:1100,margin:"0 auto",padding:"24px 16px 80px"}}>
+    <Page>
       {!results?(
-        <div style={{...S.card,textAlign:"center",padding:"60px 24px"}}>
-          <div style={{fontSize:48,marginBottom:16}}>⚽</div>
-          <div style={{...S.mono,fontSize:12,color:ACCENT,letterSpacing:2,marginBottom:24,textTransform:"uppercase"}}>Running {N_SIMS.toLocaleString()} tournament scenarios…</div>
-          <div style={{background:"#111124",borderRadius:4,height:6,width:"100%",maxWidth:400,margin:"0 auto",overflow:"hidden"}}>
-            <div style={{height:"100%",width:`${pct}%`,background:`linear-gradient(90deg,${ACCENT},#69ff47)`,borderRadius:4,transition:"width .3s ease"}} />
+        <Card style={{textAlign:"center",padding:"60px 32px"}}>
+          <div style={{...heading,fontSize:28,fontWeight:800,color:T.ink,marginBottom:8}}>Running simulations</div>
+          <div style={{...body,fontSize:14,color:T.muted,marginBottom:32}}>{progress.toLocaleString()} of {N.toLocaleString()} scenarios complete</div>
+          <div style={{height:6,background:T.border,borderRadius:3,maxWidth:400,margin:"0 auto",overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${pct}%`,background:T.red,borderRadius:3,transition:"width .3s"}} />
           </div>
-          <div style={{...S.mono,fontSize:12,color:"#555",marginTop:12}}>{progress.toLocaleString()} / {N_SIMS.toLocaleString()} — {pct}%</div>
-        </div>
+          <div style={{...body,fontSize:12,color:T.faint,marginTop:12}}>{pct}%</div>
+        </Card>
       ):(
         <>
           {/* Podium */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:24}}>
-            {[{r:1,label:"🥇 Champion",c:"#FFD700",idx:0},{r:2,label:"🥈 Finalist",c:"#C0C0C0",idx:1},{r:3,label:"🥉 Semi-final",c:"#CD7F32",idx:2}].map(({r,label,c,idx})=>{
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:32}}>
+            {[{label:"Champion",medal:"🥇",idx:0},{label:"Finalist",medal:"🥈",idx:1},{label:"Semi-final",medal:"🥉",idx:2}].map(({label,medal,idx})=>{
               const t=results[idx];
               return(
-                <div key={r} style={{...S.card,textAlign:"center",borderColor:c+"33",background:`linear-gradient(145deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01))`,transform:r===1?"scale(1.03)":"scale(1)"}}>
-                  <div style={{fontSize:10,...S.mono,color:c,letterSpacing:2,marginBottom:8}}>{label}</div>
-                  <div style={{fontSize:36}}>{t.flag}</div>
-                  <div style={{fontSize:20,fontWeight:800,marginTop:6}}>{t.name.toUpperCase()}</div>
-                  <div style={{fontSize:28,fontWeight:800,color:c,marginTop:8,lineHeight:1}}>{t.winPct.toFixed(1)}<span style={{fontSize:13,color:"#555"}}>%</span></div>
-                  <div style={{...S.mono,fontSize:10,color:"#666",marginTop:4,lineHeight:1.8}}>
-                    <div>Final {t.finalPct.toFixed(1)}%</div>
-                    <div>Semi {t.sfPct.toFixed(1)}%</div>
-                    <div>QF {t.qfPct.toFixed(1)}%</div>
+                <Card key={label} style={{textAlign:"center",borderColor:idx===0?T.redMid:T.border,background:idx===0?T.redLight:T.surface,transform:idx===0?"scale(1.03)":"scale(1)"}}>
+                  <div style={{...body,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:8}}>{medal} {label}</div>
+                  <div style={{fontSize:36,marginBottom:6}}>{t.flag}</div>
+                  <div style={{...heading,fontSize:18,fontWeight:800,color:T.ink,marginBottom:12}}>{t.name}</div>
+                  <div style={{...heading,fontSize:32,fontWeight:800,color:idx===0?T.red:T.ink,lineHeight:1}}>{t.winPct.toFixed(1)}<span style={{fontSize:14,color:T.faint}}>%</span></div>
+                  <Divider />
+                  <div style={{...body,fontSize:11,color:T.muted,lineHeight:2}}>
+                    <div>Final · {t.finalPct.toFixed(1)}%</div>
+                    <div>Semi · {t.sfPct.toFixed(1)}%</div>
+                    <div>QF · {t.qfPct.toFixed(1)}%</div>
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>
 
-          {/* Filter */}
+          {/* Filters */}
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>
-            {["ALL",...Object.keys(CC)].map(c=>(
-              <button key={c} onClick={()=>setConfFilter(c)} style={{...S.btn(confFilter===c,CC[c]||ACCENT)}}>{c}</button>
+            {["ALL","UEFA","CONMEBOL","CAF","AFC","CONCACAF"].map(c=>(
+              <OutlineBtn key={c} active={conf===c} onClick={()=>setConf(c)}>{c}</OutlineBtn>
             ))}
           </div>
 
           {/* Table */}
-          <div style={{...S.card,padding:0,overflow:"hidden"}}>
-            <div style={{display:"grid",gridTemplateColumns:"32px 28px 1fr 80px 60px 60px 60px 60px",gap:8,padding:"8px 12px",borderBottom:"1px solid rgba(255,255,255,0.08)"}}>
-              {["#","","TEAM","WIN%","FINAL","SF","QF","R16"].map(h=>(
-                <div key={h} style={{...S.mono,fontSize:9,color:"#444",letterSpacing:1.5,textAlign:h==="TEAM"?"left":"center"}}>{h}</div>
+          <Card style={{padding:0,overflow:"hidden"}}>
+            <div style={{display:"grid",gridTemplateColumns:"36px 30px 1fr 90px 64px 64px 64px 64px",gap:8,padding:"10px 14px",borderBottom:`1px solid ${T.border}`,background:"#FAFAF8"}}>
+              {["#","","Team","Win %","Final","SF","QF","R16"].map(h=>(
+                <div key={h} style={{...body,fontSize:10,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",textAlign:h==="Team"?"left":"center"}}>{h}</div>
               ))}
             </div>
-            {filtered.map((t,i)=>{
+            {filtered.map((t)=>{
               const rank=results.indexOf(t)+1;
               return(
-                <div key={t.name} style={{display:"grid",gridTemplateColumns:"32px 28px 1fr 80px 60px 60px 60px 60px",gap:8,alignItems:"center",padding:"10px 12px",borderBottom:"1px solid rgba(255,255,255,0.04)",background:rank<=5?"rgba(0,230,118,0.03)":"transparent",borderLeft:rank<=5?`2px solid ${ACCENT}`:"2px solid transparent"}}>
-                  <div style={{...S.mono,fontSize:11,color:rank<=3?"#FFD700":"#555",textAlign:"right"}}>{rank}</div>
+                <div key={t.name} style={{display:"grid",gridTemplateColumns:"36px 30px 1fr 90px 64px 64px 64px 64px",gap:8,alignItems:"center",padding:"10px 14px",borderBottom:`1px solid ${T.border}`,background:rank<=3?T.redLight:T.surface,borderLeft:rank<=3?`3px solid ${T.red}`:"3px solid transparent"}}>
+                  <div style={{...body,fontSize:11,fontWeight:600,color:rank<=3?T.red:T.faint,textAlign:"right"}}>{rank}</div>
                   <div style={{fontSize:18,textAlign:"center"}}>{t.flag}</div>
                   <div>
-                    <div style={{fontSize:14,fontWeight:700}}>{t.name}</div>
-                    <span style={S.tag(t.conf)}>{t.conf}</span>
+                    <div style={{...body,fontSize:13,fontWeight:600,color:T.ink}}>{t.name}</div>
+                    <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
                   </div>
-                  <div style={{position:"relative",height:18,background:"rgba(255,255,255,0.05)",borderRadius:2}}>
-                    <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${Math.min(100,(t.winPct/maxWin)*100)}%`,background:ACCENT,borderRadius:2,opacity:.8}} />
-                    <span style={{position:"absolute",right:4,top:0,lineHeight:"18px",...S.mono,fontSize:10,color:"#ccc"}}>{t.winPct.toFixed(1)}%</span>
+                  <div style={{position:"relative",height:20,background:T.border,borderRadius:3,overflow:"hidden"}}>
+                    <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${Math.min(100,(t.winPct/maxWin)*100)}%`,background:T.red,opacity:.8}} />
+                    <span style={{position:"absolute",right:5,top:2,...body,fontSize:10,fontWeight:600,color:T.ink}}>{t.winPct.toFixed(1)}%</span>
                   </div>
                   {[t.finalPct,t.sfPct,t.qfPct,t.r16Pct].map((v,j)=>(
-                    <div key={j} style={{...S.mono,fontSize:11,color:["#88aaff","#aaa","#777","#555"][j],textAlign:"center"}}>{v.toFixed(1)}%</div>
+                    <div key={j} style={{...body,fontSize:11,color:[T.red,T.muted,T.faint,T.faint][j],textAlign:"center",fontWeight:j===0?600:400}}>{v.toFixed(1)}%</div>
                   ))}
                 </div>
               );
             })}
-          </div>
-          <div style={{...S.mono,fontSize:10,color:"#444",textAlign:"center",marginTop:12}}>{N_SIMS.toLocaleString()} simulations · Elo-Poisson model · 48 teams · 12 groups</div>
+          </Card>
+          <div style={{...body,fontSize:11,color:T.faint,textAlign:"center",marginTop:12}}>{N.toLocaleString()} simulations · Elo-Poisson model · 48 teams · 12 groups</div>
         </>
       )}
-    </div>
+    </Page>
   );
 }
 
-function ComingSoon({title, icon, desc}){
+// ── COMING SOON ────────────────────────────────────────────────────────────────
+function ComingSoon({title,desc}){
   return(
-    <div style={{maxWidth:600,margin:"80px auto",padding:"0 16px",textAlign:"center"}}>
-      <div style={{fontSize:48,marginBottom:24,opacity:0.4}}>{icon}</div>
-      <div style={{fontSize:11,fontFamily:"'Space Mono',monospace",color:"#00e676",letterSpacing:3,marginBottom:12,textTransform:"uppercase"}}>Coming Soon</div>
-      <h2 style={{fontSize:32,fontWeight:800,letterSpacing:1,marginBottom:16}}>{title}</h2>
-      <p style={{color:"#666",fontSize:15,lineHeight:1.7,marginBottom:32}}>{desc}</p>
-      <div style={{display:"inline-block",padding:"10px 24px",border:"1px solid rgba(255,255,255,0.1)",borderRadius:6,color:"#555",fontFamily:"'Space Mono',monospace",fontSize:11,letterSpacing:1}}>
-        Powered by Claude AI · Launching soon
+    <Page>
+      <div style={{maxWidth:520,margin:"60px auto",textAlign:"center"}}>
+        <div style={{width:64,height:64,borderRadius:"50%",background:T.redLight,border:`1px solid ${T.redMid}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",fontSize:24}}>⏳</div>
+        <h2 style={{...heading,fontSize:32,fontWeight:800,color:T.ink,letterSpacing:-1,marginBottom:12}}>{title}</h2>
+        <p style={{...body,fontSize:15,color:T.muted,lineHeight:1.7,marginBottom:28}}>{desc}</p>
+        <div style={{...body,fontSize:12,color:T.faint,padding:"10px 20px",background:T.surface,border:`1px solid ${T.border}`,borderRadius:8,display:"inline-block"}}>
+          Powered by Claude AI · Available soon
+        </div>
       </div>
-    </div>
+    </Page>
   );
 }
 
-// ── PREDICTOR SECTION ──────────────────────────────────────────────────────────
+// ── PREDICTOR ─────────────────────────────────────────────────────────────────
 function PredictorSection(){
-  return <ComingSoon title="AI Match Predictor" icon="⚡" desc="Pick any two teams and get a full tactical breakdown — win probabilities, key battles, score prediction, and wild card factors. Powered by Claude AI with real-time data." />;
+  return <ComingSoon title="Match Predictor" desc="Pick any two teams for a full AI tactical breakdown — win probabilities, key individual battles, score prediction, and wild card factors powered by Claude." />;
 }
-
-
-// ── LINEUPS SECTION ──────────────────────────────────────────────────────────
 function LineupsSection(){
-  return <ComingSoon title="AI Lineup Predictor" icon="◈" desc="Select any of the 48 teams and get a predicted starting XI based on current injuries, suspensions, and form — sourced from live news via Claude AI." />;
+  return <ComingSoon title="Lineup Predictor" desc="Select any team and get a predicted starting XI based on current injuries, suspensions, and form — sourced from live news via Claude AI with web search." />;
 }
-
-
-// ── NEWS SECTION ───────────────────────────────────────────────────────────────
 function NewsSection(){
-  return <ComingSoon title="Live News Feed" icon="◎" desc="Real-time World Cup 2026 news summaries, sourced and synthesised by Claude AI with web search. Covering transfers, qualifications, squad updates, and tournament news." />;
+  return <ComingSoon title="Live News Feed" desc="Real-time World Cup 2026 news summaries synthesised by Claude AI. Covering transfers, qualifications, squad updates, and tournament developments." />;
 }
 
-
-// ── ROOT ───────────────────────────────────────────────────────────────────────
-export default function FIFA2026Hub(){
+// ── ROOT ──────────────────────────────────────────────────────────────────────
+export default function App(){
   const [tab,setTab]=useState("home");
   return(
-    <div style={{fontFamily:"'Barlow Condensed',sans-serif",background:"#080815",minHeight:"100vh",color:"#e8e8f0"}}>
-      <style>{FONT_CSS}</style>
+    <div style={{...body,background:T.bg,minHeight:"100vh",color:T.ink}}>
+      <style>{`${FONTS} *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;} ::-webkit-scrollbar{width:5px;background:${T.bg};} ::-webkit-scrollbar-thumb{background:${T.border};border-radius:3px;} button{cursor:pointer;font-family:inherit;}`}</style>
       <Nav tab={tab} setTab={setTab} />
-      {tab==="home"&&<HomeSection setTab={setTab} />}
-      {tab==="teams"&&<TeamsSection />}
-      {tab==="sim"&&<SimulatorSection />}
+      {tab==="home"     &&<HomeSection setTab={setTab} />}
+      {tab==="teams"    &&<TeamsSection />}
+      {tab==="sim"      &&<SimulatorSection />}
       {tab==="predictor"&&<PredictorSection />}
-      {tab==="lineups"&&<LineupsSection />}
-      {tab==="news"&&<NewsSection />}
+      {tab==="lineups"  &&<LineupsSection />}
+      {tab==="news"     &&<NewsSection />}
     </div>
   );
 }
