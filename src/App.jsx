@@ -1070,67 +1070,59 @@ async function callClaude(prompt,sys="",search=false){
   return d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
 }
 
-// ── API-FOOTBALL — proxied via /api/football to avoid CORS ───────────────────
-const AF_KEY = import.meta.env.VITE_APIFOOTBALL_KEY || "";
-const _afCache = {};
+// ── FOOTBALL-DATA.ORG — free, includes 2025/2026 data ────────────────────────
+const FD_KEY = import.meta.env.VITE_FOOTBALLDATA_KEY || "";
+const _fdCache = {};
 
-async function afGet(path){
-  if(_afCache[path]) return _afCache[path];
-  if(!AF_KEY) return null;
+async function fdGet(path){
+  if(_fdCache[path]) return _fdCache[path];
+  if(!FD_KEY) return null;
   try{
-    // Route through our Vercel serverless proxy — avoids CORS
     const p = path.startsWith("/") ? path.slice(1) : path;
     const r = await fetch(`/api/football?p=${encodeURIComponent(p)}`);
     if(!r.ok) return null;
     const d = await r.json();
-    if(d.error) return null;
-    _afCache[path] = d;
+    if(d.errorCode) return null;
+    _fdCache[path] = d;
     return d;
   }catch{ return null; }
 }
 
-// Hardcoded API-Football team IDs for all 48 WC 2026 qualified nations
-const AF_TEAM_IDS = {
-  "France":2,"Spain":9,"Germany":25,"England":10,"Portugal":27,"Netherlands":3,
-  "Belgium":1,"Argentina":26,"Brazil":6,"Uruguay":7,"Colombia":8,"Ecuador":130,
-  "Paraguay":27,"Morocco":31,"Senegal":27,"Egypt":23,"Ivory Coast":46,"Tunisia":1247,
-  "Algeria":3,"South Africa":48,"Ghana":22,"DR Congo":105,"Cape Verde":3571,
-  "Japan":37,"South Korea":149,"Iran":29,"Saudi Arabia":36,"Australia":1,"Uzbekistan":3672,
-  "Qatar":1,"Jordan":3576,"Iraq":1,"USA":2,"Mexico":16,"Canada":91,"Panama":78,
-  "Haiti":508,"Curaçao":3673,"New Zealand":106,"Croatia":3,"Austria":776,
-  "Switzerland":15,"Norway":1,"Türkiye":21,"Sweden":1613,"Scotland":1,"Bosnia and Herzegovina":1,
-  "Czechia":1,"South Korea":149,
+// football-data.org team IDs for all 48 WC 2026 qualified nations
+const FD_TEAM_IDS = {
+  "France":773,"England":66,"Spain":760,"Germany":759,"Portugal":765,
+  "Netherlands":828,"Belgium":805,"Croatia":799,"Austria":816,"Switzerland":788,
+  "Norway":761,"Türkiye":769,"Sweden":792,"Scotland":771,"Bosnia and Herzegovina":555,
+  "Czechia":798,"Argentina":762,"Brazil":764,"Uruguay":780,"Colombia":779,
+  "Ecuador":775,"Paraguay":796,"Morocco":1031,"Senegal":777,"Egypt":812,
+  "Ivory Coast":1067,"Tunisia":803,"South Africa":815,"Algeria":1101,"Ghana":1072,
+  "DR Congo":1096,"Cape Verde":1126,"Japan":810,"South Korea":772,"Iran":781,
+  "Saudi Arabia":783,"Australia":747,"Uzbekistan":1307,"Qatar":8601,"Jordan":1308,
+  "Iraq":806,"USA":768,"Mexico":758,"Canada":786,"Panama":1358,"Haiti":507,
+  "Curaçao":1877,"New Zealand":1769,
 };
 
-// Team IDs cached in localStorage — search API fills gaps
-function getCachedId(name){ try{ return JSON.parse(localStorage.getItem("af_ids")||"{}")[name]||null; }catch{return null;} }
-function setCachedId(name,id){ try{ const m=JSON.parse(localStorage.getItem("af_ids")||"{}"); m[name]=id; localStorage.setItem("af_ids",JSON.stringify(m)); }catch{} }
+function getFdCached(name){ try{ return JSON.parse(localStorage.getItem("fd_ids")||"{}")[name]||null; }catch{return null;} }
+function setFdCached(name,id){ try{ const m=JSON.parse(localStorage.getItem("fd_ids")||"{}"); m[name]=id; localStorage.setItem("fd_ids",JSON.stringify(m)); }catch{} }
 
-async function afTeamId(name){
-  // 1. Check localStorage cache first
-  const cached = getCachedId(name);
+async function fdTeamId(name){
+  const cached = getFdCached(name);
   if(cached) return cached;
-  // 2. Search API — most reliable source
-  const nameMap = {
-    "USA":"United States","South Korea":"Korea Republic","Türkiye":"Turkey",
-    "Ivory Coast":"Côte d'Ivoire","Bosnia and Herzegovina":"Bosnia",
-    "Curaçao":"Curacao","New Zealand":"New-Zealand",
-  };
-  const searchName = nameMap[name] || name;
-  const d = await afGet(`/teams?name=${encodeURIComponent(searchName)}`);
-  const id = d?.response?.[0]?.team?.id || null;
-  if(id){ setCachedId(name,id); return id; }
+  const id = FD_TEAM_IDS[name] || null;
+  if(id){ setFdCached(name,id); return id; }
   return null;
 }
 
 async function afRecentForm(teamId){
-  const d = await afGet(`/fixtures?team=${teamId}&last=5`);
-  if(!d?.response?.length) return null;
-  // API returns newest first — reverse so oldest→newest
-  return [...d.response].reverse().map(f=>{
-    const isHome = f.teams.home.id === teamId;
-    const gh = f.goals.home, ga = f.goals.away;
-    if(gh===null||ga===null) return null;
+  // football-data.org: last 10 finished matches, includes 2025/2026
+  const d = await fdGet(`/teams/${teamId}/matches?status=FINISHED&limit=10`);
+  if(!d?.matches?.length) return null;
+  const sorted = [...d.matches].sort((a,b)=>new Date(a.utcDate)-new Date(b.utcDate));
+  const last5 = sorted.slice(-5);
+  return last5.map(m=>{
+    const isHome = m.homeTeam.id === teamId;
+    const gh = m.score?.fullTime?.home, ga = m.score?.fullTime?.away;
+    if(gh===null||gh===undefined) return null;
     if(isHome) return gh>ga?"W":gh<ga?"L":"D";
     return ga>gh?"W":ga<gh?"L":"D";
   }).filter(Boolean);
@@ -1138,16 +1130,29 @@ async function afRecentForm(teamId){
 
 async function afQualRecord(teamId){
   // WC 2026 qualifying window: Sept 2023 – April 2026
-  const d = await afGet(`/fixtures?team=${teamId}&from=2023-09-01&to=2026-04-01&status=FT`);
-  if(!d?.response) return null;
-  // Filter to qualifying / World Cup competition type — exclude friendlies
-  const qual = d.response.filter(f=>{
+  // Free plan: seasons 2022-2024 only — qualifying ran across 2023+2024
+  const [d1,d2] = await Promise.all([
+    afGet(`/fixtures?team=${teamId}&season=2023&status=FT`),
+    afGet(`/fixtures?team=${teamId}&season=2024&status=FT`),
+  ]);
+  const combined = [...(d1?.response||[]),...(d2?.response||[])];
+  const d = {response:combined};
+  if(!d?.response?.length) return null;
+  // Filter out friendlies — keep any competitive match (league/cup/qualifier)
+  const competitive = d.response.filter(f=>{
     const n = (f.league.name||"").toLowerCase();
-    return n.includes("qualif") || n.includes("world cup") || n.includes("playoff") || n.includes("play-off");
+    const t = (f.league.type||"").toLowerCase();
+    // Exclude pure friendlies; include anything with qualifying/cup/nations league keywords
+    return !n.includes("friendly") && t !== "friendly" && (
+      n.includes("qualif") || n.includes("world cup") || n.includes("nations") ||
+      n.includes("copa") || n.includes("euro") || n.includes("africa") ||
+      n.includes("asian") || n.includes("concacaf") || n.includes("playoff") ||
+      t === "cup" || t === "league"
+    );
   });
-  if(!qual.length) return null;
+  if(!competitive.length) return null;
   let W=0,D=0,L=0;
-  qual.forEach(f=>{
+  competitive.forEach(f=>{
     const isHome = f.teams.home.id===teamId;
     const gh=f.goals.home, ga=f.goals.away;
     if(gh===null||ga===null) return;
@@ -1202,8 +1207,8 @@ function EloModal({team,onClose}){
 
   // Look up team ID once when modal opens
   useEffect(()=>{
-    if(!AF_KEY){setFormState("nokey");setQualState("nokey");return;}
-    afTeamId(team.name).then(id=>{
+    if(!FD_KEY){setFormState("nokey");setQualState("nokey");return;}
+    fdTeamId(team.name).then(id=>{
       if(id) setTeamId(id);
       else {setFormState("error");setQualState("error");}
     });
@@ -1242,7 +1247,7 @@ function EloModal({team,onClose}){
   function FormDetail(){
     if(formState==="nokey") return(
       <div style={{paddingBottom:12,...B,fontSize:12,color:T.faint}}>
-        Add <code style={{background:T.bg,padding:"1px 5px",borderRadius:3}}>VITE_APIFOOTBALL_KEY</code> in Vercel to show live results.
+        Add <code style={{background:T.bg,padding:"1px 5px",borderRadius:3}}>VITE_FOOTBALLDATA_KEY</code> in Vercel to show live results.
       </div>
     );
     if(formState==="loading") return(
@@ -1259,7 +1264,7 @@ function EloModal({team,onClose}){
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
           <div style={{width:6,height:6,borderRadius:"50%",background:"#16A34A"}}/>
           <span style={{...B,fontSize:11,color:"#16A34A",fontWeight:600}}>Live · API-Football</span>
-          <span style={{...B,fontSize:11,color:T.faint,marginLeft:4}}>Last 5 matches (oldest → most recent)</span>
+          <span style={{...B,fontSize:11,color:T.faint,marginLeft:4}}>Last 5 matches in 2024 season · <a href="https://api-sports.io" target="_blank" rel="noopener" style={{color:T.faint}}>upgrade for 2025 data</a></span>
         </div>
         <div style={{display:"flex",gap:8,marginBottom:10}}>
           {liveForm.map((res,j)=>(
@@ -1281,7 +1286,7 @@ function EloModal({team,onClose}){
   function QualDetail(){
     if(qualState==="nokey") return(
       <div style={{paddingBottom:12,...B,fontSize:12,color:T.faint}}>
-        Add <code style={{background:T.bg,padding:"1px 5px",borderRadius:3}}>VITE_APIFOOTBALL_KEY</code> in Vercel to show live data.
+        Add <code style={{background:T.bg,padding:"1px 5px",borderRadius:3}}>VITE_FOOTBALLDATA_KEY</code> in Vercel to show live data.
       </div>
     );
     if(qualState==="loading") return(
@@ -1298,7 +1303,7 @@ function EloModal({team,onClose}){
         <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
           <div style={{width:6,height:6,borderRadius:"50%",background:"#16A34A"}}/>
           <span style={{...B,fontSize:11,color:"#16A34A",fontWeight:600}}>Live · API-Football</span>
-          <span style={{...B,fontSize:11,color:T.faint,marginLeft:4}}>2026 World Cup qualifying record</span>
+          <span style={{...B,fontSize:11,color:T.faint,marginLeft:4}}>Competitive record 2023–2024 seasons</span>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8}}>
           {[["W",liveQual.W,"#16A34A","#f0fdf4"],["D",liveQual.D,"#6B7280","#f3f4f6"],["L",liveQual.L,"#C84B31","#fef2f2"],["P",liveQual.total,T.ink,T.bg]].map(([lbl,val,col,bg])=>(
