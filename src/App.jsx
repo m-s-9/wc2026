@@ -1072,7 +1072,7 @@ async function callClaude(prompt,sys="",search=false){
 
 // ── API-FOOTBALL ──────────────────────────────────────────────────────────────
 const AF_KEY = import.meta.env.VITE_APIFOOTBALL_KEY || "";
-const AF_BASE = "https://v3.api-football.com";
+const AF_BASE = "https://v3.football.api-sports.io";
 const _afCache = {};
 
 async function afGet(path){
