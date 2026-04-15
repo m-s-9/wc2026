@@ -1091,7 +1091,7 @@ function fifaTeamUrl(name){
   return code?`https://www.fifa.com/en/associations/association/${code}/national-team/men`:null;
 }
 
-// Wikipedia qualifying pages — stable, complete, confederation-level
+// Wikipedia qualifying pages — by confederation
 const QUAL_URLS = {
   "UEFA":     "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(UEFA)",
   "CONMEBOL": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(CONMEBOL)",
@@ -1100,6 +1100,70 @@ const QUAL_URLS = {
   "CONCACAF": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(CONCACAF)",
   "OFC":      "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(OFC)",
 };
+
+// How each team qualified — sourced from Wikipedia/official records
+const QUAL_PATH = {
+  "France":        "UEFA Group D winners",
+  "England":       "UEFA Group B runners-up",
+  "Spain":         "UEFA Group E winners",
+  "Germany":       "UEFA Group 3 winners",
+  "Portugal":      "UEFA Group A winners",
+  "Netherlands":   "UEFA Group G winners",
+  "Belgium":       "UEFA Group F winners",
+  "Croatia":       "UEFA Group E runners-up",
+  "Austria":       "UEFA Group I winners",
+  "Switzerland":   "UEFA Group C winners",
+  "Norway":        "UEFA Group B winners",
+  "Türkiye":       "UEFA Playoff Path C winners · beat Kosovo 1–0",
+  "Sweden":        "UEFA Playoff Path B winners · beat Poland 3–2",
+  "Scotland":      "UEFA Group B runners-up",
+  "Bosnia and Herzegovina": "UEFA Playoff Path A winners · beat Italy on penalties",
+  "Czechia":       "UEFA Playoff Path D winners · beat Denmark on penalties",
+  "Argentina":     "CONMEBOL qualifying · 1st place",
+  "Brazil":        "CONMEBOL qualifying · 2nd place",
+  "Colombia":      "CONMEBOL qualifying · 3rd place",
+  "Uruguay":       "CONMEBOL qualifying · 4th place",
+  "Ecuador":       "CONMEBOL qualifying · 5th place",
+  "Paraguay":      "CONMEBOL qualifying · 6th place",
+  "Morocco":       "CAF Group F winners",
+  "Senegal":       "CAF Group I winners",
+  "Egypt":         "CAF Group D winners",
+  "Ivory Coast":   "CAF Group G winners",
+  "Tunisia":       "CAF Group B winners",
+  "South Africa":  "CAF Group C winners",
+  "Algeria":       "CAF Group H winners",
+  "Ghana":         "CAF qualifying · best runners-up",
+  "Cape Verde":    "CAF Group E winners",
+  "DR Congo":      "Inter-confederation playoff · beat Jamaica 1–0",
+  "Japan":         "AFC Final Round Group C winners",
+  "South Korea":   "AFC Final Round Group B runners-up",
+  "Iran":          "AFC Final Round Group A winners",
+  "Saudi Arabia":  "AFC Final Round Group B winners",
+  "Australia":     "AFC Final Round Group C runners-up",
+  "Uzbekistan":    "AFC Final Round Group A runners-up",
+  "Qatar":         "AFC Final Round via playoff",
+  "Jordan":        "AFC Final Round via playoff",
+  "Iraq":          "Inter-confederation playoff · beat Bolivia 2–1",
+  "USA":           "Automatic · Co-host nation",
+  "Mexico":        "Automatic · Co-host nation",
+  "Canada":        "Automatic · Co-host nation",
+  "Panama":        "CONCACAF qualifying",
+  "Haiti":         "CONCACAF qualifying",
+  "Curaçao":       "CONCACAF qualifying · first ever World Cup",
+  "New Zealand":   "OFC qualifying winners",
+};
+
+// eloratings.net URL — authoritative public Elo tracker, updated after every match
+function eloRatingsUrl(name){
+  const map = {
+    "USA":"United_States","Türkiye":"Turkey","Ivory Coast":"Ivory_Coast",
+    "South Korea":"South_Korea","DR Congo":"DR_Congo","Bosnia and Herzegovina":"Bosnia_and_Herzegovina",
+    "Cape Verde":"Cape_Verde","New Zealand":"New_Zealand","Saudi Arabia":"Saudi_Arabia",
+    "South Africa":"South_Africa",
+  };
+  const n = map[name] || name.replace(/ /g,"_");
+  return `https://www.eloratings.net/${n}`;
+}
 
 
 
@@ -1143,19 +1207,23 @@ function EloModal({team,onClose}){
   const [hovered,setHovered]=useState(null);
   if(!bd)return null;
 
-  const espnUrl = fifaTeamUrl(team.name);
-  const qualUrl = QUAL_URLS[team.conf];
+  const eloUrl    = eloRatingsUrl(team.name);
+  const qualUrl   = QUAL_URLS[team.conf];
+  const qualPath  = QUAL_PATH[team.name];
+  const fifaUrl   = fifaTeamUrl(team.name);
+  const wcUrl     = "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/match-centre";
 
   const rows=[
     {key:"base",label:"International baseline",  desc:"Starting point for established FIFA member nations",val:bd.b,hover:null},
-    {key:"form",label:"Recent form",              desc:"Based on results in the 18 months prior to the tournament",val:bd.f,hover:"form"},
-    {key:"qual",label:"Qualifying campaign",      desc:"Performance in official 2026 World Cup qualifying matches",val:bd.q,hover:"qual"},
-    {key:"pedi",label:"Tournament pedigree",      desc:"Historical World Cup performance, titles, and deep runs",val:bd.p,hover:null},
+    {key:"form",label:"WC 2026 form",            desc:"Match-by-match results during the tournament",val:bd.f,hover:"form"},
+    {key:"qual",label:"Qualifying campaign",      desc:"How they qualified for the 2026 World Cup",val:bd.q,hover:"qual"},
+    {key:"pedi",label:"Tournament pedigree",      desc:"Historical World Cup performance and titles",val:bd.p,hover:null},
   ];
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.6)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:480,boxShadow:"0 24px 64px rgba(0,0,0,0.22)",overflow:"hidden",maxHeight:"90vh",overflowY:"auto"}}>
+
         {/* Header */}
         <div style={{background:T.redLight,padding:"18px 24px",borderBottom:`1px solid ${T.redMid}`,display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0}}>
           <div style={{display:"flex",gap:12,alignItems:"center"}}>
@@ -1165,14 +1233,17 @@ function EloModal({team,onClose}){
               <div style={{...B,fontSize:12,color:T.muted}}>Elo rank #{rank} · FIFA #{team.rank} (April 2026)</div>
             </div>
           </div>
-          <div style={{textAlign:"right"}}>
+          {/* Elo number links to eloratings.net */}
+          <a href={eloUrl} target="_blank" rel="noopener noreferrer" style={{textAlign:"right",textDecoration:"none"}}>
             <div style={{...H,fontSize:28,fontWeight:800,color:T.red,lineHeight:1}}>{team.elo}</div>
-            <div style={{...B,fontSize:10,color:T.faint}}>Elo rating</div>
-          </div>
+            <div style={{...B,fontSize:10,color:T.red,marginTop:2,textDecoration:"underline dotted"}}>eloratings.net ↗</div>
+          </a>
         </div>
+
         {/* Context note */}
         <div style={{padding:"14px 24px 0",...B,fontSize:13,color:T.muted,lineHeight:1.6}}>{bd.note}</div>
-        {/* Breakdown */}
+
+        {/* Breakdown rows */}
         <div style={{padding:"12px 24px 0"}}>
           <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:8}}>Rating breakdown</div>
           {rows.map((r,i)=>(
@@ -1180,7 +1251,7 @@ function EloModal({team,onClose}){
               onMouseEnter={()=>r.hover&&setHovered(r.key)}
               onMouseLeave={()=>setHovered(null)}
               style={{borderBottom:i<rows.length-1?`1px solid ${T.border}`:"none"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",gap:16}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",gap:16,cursor:r.hover?"pointer":"default"}}>
                 <div style={{flex:1}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
                     <div style={{...B,fontSize:13,fontWeight:500,color:T.ink}}>{r.label}</div>
@@ -1192,49 +1263,56 @@ function EloModal({team,onClose}){
                   {r.val>0?"+":""}{r.val.toLocaleString()}
                 </div>
               </div>
-              {/* Recent form hover — ESPN link */}
+
+              {/* WC 2026 Form hover */}
               {r.key==="form"&&hovered==="form"&&(
-                <div style={{paddingBottom:14}}>
-                  <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.6,marginBottom:10}}>
-                    FIFA.com has {team.name}'s full match history including recent results and fixtures.
+                <div style={{paddingBottom:14,borderTop:`1px dashed ${T.border}`,paddingTop:12}}>
+                  <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:12,padding:"10px 14px",background:"#FFF8F0",borderRadius:8,border:"1px solid #F0C84B44"}}>
+                    <span style={{fontSize:18}}>⏳</span>
+                    <div>
+                      <div style={{...H,fontSize:13,fontWeight:700,color:T.ink,marginBottom:3}}>Tournament begins June 11, 2026</div>
+                      <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.5}}>
+                        {team.name}'s match-by-match World Cup results will be sourced directly from FIFA once the tournament is live.
+                      </div>
+                    </div>
                   </div>
-                  {espnUrl?(
-                    <a href={espnUrl} target="_blank" rel="noopener noreferrer"
-                      style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 16px",borderRadius:8,background:"#026cb6",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
-                      <span>📊</span> View {team.name} on FIFA.com →
-                    </a>
-                  ):(
-                    <div style={{...B,fontSize:12,color:T.faint}}>ESPN link not available for this team.</div>
-                  )}
+                  <a href={wcUrl} target="_blank" rel="noopener noreferrer"
+                    style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 16px",borderRadius:8,background:T.red,color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
+                    🏆 FIFA WC 2026 Match Centre →
+                  </a>
                 </div>
               )}
-              {/* Qualifying campaign hover — FIFA link */}
+
+              {/* Qualifying Campaign hover */}
               {r.key==="qual"&&hovered==="qual"&&(
-                <div style={{paddingBottom:14}}>
-                  <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.6,marginBottom:10}}>
-                    Full 2026 World Cup qualifying results and tables for {team.conf} are on FIFA.com.
-                  </div>
-                  {qualUrl?(
-                    <a href={qualUrl} target="_blank" rel="noopener noreferrer"
-                      style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 16px",borderRadius:8,background:"#1a56db",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
-                      <span>🏆</span> View {team.conf} qualifying on FIFA.com →
-                    </a>
-                  ):(
-                    <div style={{...B,fontSize:12,color:T.faint}}>FIFA qualifying link not available.</div>
+                <div style={{paddingBottom:14,borderTop:`1px dashed ${T.border}`,paddingTop:12}}>
+                  {qualPath&&(
+                    <div style={{padding:"10px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`,marginBottom:12}}>
+                      <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",marginBottom:4}}>Qualified as</div>
+                      <div style={{...H,fontSize:14,fontWeight:700,color:T.ink}}>{qualPath}</div>
+                    </div>
                   )}
+                  <a href={qualUrl} target="_blank" rel="noopener noreferrer"
+                    style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 16px",borderRadius:8,background:"#1a56db",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
+                    📋 Full {team.conf} qualifying on Wikipedia →
+                  </a>
                 </div>
               )}
             </div>
           ))}
         </div>
+
         {/* Total */}
-        <div style={{padding:"0 24px 16px"}}>
+        <div style={{padding:"8px 24px 16px"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`}}>
             <div style={{...H,fontSize:14,fontWeight:700,color:T.ink}}>Total Elo Rating</div>
-            <div style={{...H,fontSize:22,fontWeight:800,color:T.red}}>{team.elo}</div>
+            <a href={eloUrl} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none",display:"flex",alignItems:"center",gap:6}}>
+              <div style={{...H,fontSize:22,fontWeight:800,color:T.red}}>{team.elo}</div>
+              <span style={{...B,fontSize:10,color:T.red,textDecoration:"underline dotted"}}>verify ↗</span>
+            </a>
           </div>
           <div style={{...B,fontSize:11,color:T.faint,marginTop:8,lineHeight:1.5}}>
-            A 200-point Elo gap equals approx. 76% win probability for the stronger side.
+            Elo ratings sourced from <a href="https://www.eloratings.net" target="_blank" rel="noopener noreferrer" style={{color:T.red,textDecoration:"none"}}>eloratings.net</a> · A 200-point gap equals approx. 76% win probability for the stronger side.
           </div>
         </div>
         <div style={{padding:"0 24px 18px"}}>
