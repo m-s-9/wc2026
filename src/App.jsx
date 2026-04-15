@@ -1070,97 +1070,72 @@ async function callClaude(prompt,sys="",search=false){
   return d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
 }
 
-// ── FOOTBALL-DATA.ORG — free, includes 2025/2026 data ────────────────────────
-const FD_KEY = import.meta.env.VITE_FOOTBALLDATA_KEY || "";
-const _fdCache = {};
-
-async function fdGet(path){
-  if(_fdCache[path]) return _fdCache[path];
-  if(!FD_KEY) return null;
-  try{
-    const p = path.startsWith("/") ? path.slice(1) : path;
-    const r = await fetch(`/api/football?p=${encodeURIComponent(p)}`);
-    if(!r.ok) return null;
-    const d = await r.json();
-    if(d.errorCode) return null;
-    _fdCache[path] = d;
-    return d;
-  }catch{ return null; }
-}
-
-// football-data.org team IDs for all 48 WC 2026 qualified nations
-const FD_TEAM_IDS = {
-  "France":773,"England":66,"Spain":760,"Germany":759,"Portugal":765,
-  "Netherlands":828,"Belgium":805,"Croatia":799,"Austria":816,"Switzerland":788,
-  "Norway":761,"Türkiye":769,"Sweden":792,"Scotland":771,"Bosnia and Herzegovina":555,
-  "Czechia":798,"Argentina":762,"Brazil":764,"Uruguay":780,"Colombia":779,
-  "Ecuador":775,"Paraguay":796,"Morocco":1031,"Senegal":777,"Egypt":812,
-  "Ivory Coast":1067,"Tunisia":803,"South Africa":815,"Algeria":1101,"Ghana":1072,
-  "DR Congo":1096,"Cape Verde":1126,"Japan":810,"South Korea":772,"Iran":781,
-  "Saudi Arabia":783,"Australia":747,"Uzbekistan":1307,"Qatar":8601,"Jordan":1308,
-  "Iraq":806,"USA":768,"Mexico":758,"Canada":786,"Panama":1358,"Haiti":507,
-  "Curaçao":1877,"New Zealand":1769,
+// ── ESPN / FIFA LINKS — direct links instead of live API ─────────────────────
+// ESPN national team URLs: espn.com/soccer/team/results/_/id/{id}/{slug}
+const ESPN_URLS = {
+  "France":       "https://www.espn.com/soccer/team/results/_/id/2/france",
+  "England":      "https://www.espn.com/soccer/team/results/_/id/3/england",
+  "Spain":        "https://www.espn.com/soccer/team/results/_/id/164/spain",
+  "Germany":      "https://www.espn.com/soccer/team/results/_/id/12/germany",
+  "Portugal":     "https://www.espn.com/soccer/team/results/_/id/14/portugal",
+  "Netherlands":  "https://www.espn.com/soccer/team/results/_/id/17/netherlands",
+  "Belgium":      "https://www.espn.com/soccer/team/results/_/id/4/belgium",
+  "Croatia":      "https://www.espn.com/soccer/team/results/_/id/45/croatia",
+  "Austria":      "https://www.espn.com/soccer/team/results/_/id/44/austria",
+  "Switzerland":  "https://www.espn.com/soccer/team/results/_/id/24/switzerland",
+  "Norway":       "https://www.espn.com/soccer/team/results/_/id/20/norway",
+  "Türkiye":      "https://www.espn.com/soccer/team/results/_/id/26/turkey",
+  "Sweden":       "https://www.espn.com/soccer/team/results/_/id/23/sweden",
+  "Scotland":     "https://www.espn.com/soccer/team/results/_/id/22/scotland",
+  "Bosnia and Herzegovina": "https://www.espn.com/soccer/team/results/_/id/467/bosnia-and-herzegovina",
+  "Czechia":      "https://www.espn.com/soccer/team/results/_/id/46/czech-republic",
+  "Argentina":    "https://www.espn.com/soccer/team/results/_/id/9/argentina",
+  "Brazil":       "https://www.espn.com/soccer/team/results/_/id/6/brazil",
+  "Uruguay":      "https://www.espn.com/soccer/team/results/_/id/27/uruguay",
+  "Colombia":     "https://www.espn.com/soccer/team/results/_/id/8/colombia",
+  "Ecuador":      "https://www.espn.com/soccer/team/results/_/id/107/ecuador",
+  "Paraguay":     "https://www.espn.com/soccer/team/results/_/id/16/paraguay",
+  "Morocco":      "https://www.espn.com/soccer/team/results/_/id/207/morocco",
+  "Senegal":      "https://www.espn.com/soccer/team/results/_/id/221/senegal",
+  "Egypt":        "https://www.espn.com/soccer/team/results/_/id/186/egypt",
+  "Ivory Coast":  "https://www.espn.com/soccer/team/results/_/id/182/ivory-coast",
+  "Tunisia":      "https://www.espn.com/soccer/team/results/_/id/224/tunisia",
+  "South Africa": "https://www.espn.com/soccer/team/results/_/id/222/south-africa",
+  "Algeria":      "https://www.espn.com/soccer/team/results/_/id/172/algeria",
+  "Ghana":        "https://www.espn.com/soccer/team/results/_/id/191/ghana",
+  "DR Congo":     "https://www.espn.com/soccer/team/results/_/id/184/dr-congo",
+  "Cape Verde":   "https://www.espn.com/soccer/team/results/_/id/179/cape-verde",
+  "Japan":        "https://www.espn.com/soccer/team/results/_/id/306/japan",
+  "South Korea":  "https://www.espn.com/soccer/team/results/_/id/331/south-korea",
+  "Iran":         "https://www.espn.com/soccer/team/results/_/id/304/iran",
+  "Saudi Arabia": "https://www.espn.com/soccer/team/results/_/id/326/saudi-arabia",
+  "Australia":    "https://www.espn.com/soccer/team/results/_/id/297/australia",
+  "Uzbekistan":   "https://www.espn.com/soccer/team/results/_/id/338/uzbekistan",
+  "Qatar":        "https://www.espn.com/soccer/team/results/_/id/324/qatar",
+  "Jordan":       "https://www.espn.com/soccer/team/results/_/id/310/jordan",
+  "Iraq":         "https://www.espn.com/soccer/team/results/_/id/303/iraq",
+  "USA":          "https://www.espn.com/soccer/team/results/_/id/564/united-states",
+  "Mexico":       "https://www.espn.com/soccer/team/results/_/id/58/mexico",
+  "Canada":       "https://www.espn.com/soccer/team/results/_/id/96/canada",
+  "Panama":       "https://www.espn.com/soccer/team/results/_/id/115/panama",
+  "Haiti":        "https://www.espn.com/soccer/team/results/_/id/104/haiti",
+  "Curaçao":      "https://www.espn.com/soccer/team/results/_/id/6655/curacao",
+  "New Zealand":  "https://www.espn.com/soccer/team/results/_/id/317/new-zealand",
 };
 
-function getFdCached(name){ try{ return JSON.parse(localStorage.getItem("fd_ids")||"{}")[name]||null; }catch{return null;} }
-function setFdCached(name,id){ try{ const m=JSON.parse(localStorage.getItem("fd_ids")||"{}"); m[name]=id; localStorage.setItem("fd_ids",JSON.stringify(m)); }catch{} }
+// FIFA qualifying pages per confederation
+const QUAL_URLS = {
+  "UEFA":     "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/uefa",
+  "CONMEBOL": "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/conmebol",
+  "CAF":      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/caf",
+  "AFC":      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/afc",
+  "CONCACAF": "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/concacaf",
+  "OFC":      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/ofc",
+};
 
-async function fdTeamId(name){
-  const cached = getFdCached(name);
-  if(cached) return cached;
-  const id = FD_TEAM_IDS[name] || null;
-  if(id){ setFdCached(name,id); return id; }
-  return null;
-}
 
-async function afRecentForm(teamId){
-  // football-data.org: last 10 finished matches, includes 2025/2026
-  const d = await fdGet(`/teams/${teamId}/matches?status=FINISHED&limit=10`);
-  if(!d?.matches?.length) return null;
-  const sorted = [...d.matches].sort((a,b)=>new Date(a.utcDate)-new Date(b.utcDate));
-  const last5 = sorted.slice(-5);
-  return last5.map(m=>{
-    const isHome = m.homeTeam.id === teamId;
-    const gh = m.score?.fullTime?.home, ga = m.score?.fullTime?.away;
-    if(gh===null||gh===undefined) return null;
-    if(isHome) return gh>ga?"W":gh<ga?"L":"D";
-    return ga>gh?"W":ga<gh?"L":"D";
-  }).filter(Boolean);
-}
 
-async function afQualRecord(teamId){
-  // WC 2026 qualifying window: Sept 2023 – April 2026
-  // Free plan: seasons 2022-2024 only — qualifying ran across 2023+2024
-  const [d1,d2] = await Promise.all([
-    afGet(`/fixtures?team=${teamId}&season=2023&status=FT`),
-    afGet(`/fixtures?team=${teamId}&season=2024&status=FT`),
-  ]);
-  const combined = [...(d1?.response||[]),...(d2?.response||[])];
-  const d = {response:combined};
-  if(!d?.response?.length) return null;
-  // Filter out friendlies — keep any competitive match (league/cup/qualifier)
-  const competitive = d.response.filter(f=>{
-    const n = (f.league.name||"").toLowerCase();
-    const t = (f.league.type||"").toLowerCase();
-    // Exclude pure friendlies; include anything with qualifying/cup/nations league keywords
-    return !n.includes("friendly") && t !== "friendly" && (
-      n.includes("qualif") || n.includes("world cup") || n.includes("nations") ||
-      n.includes("copa") || n.includes("euro") || n.includes("africa") ||
-      n.includes("asian") || n.includes("concacaf") || n.includes("playoff") ||
-      t === "cup" || t === "league"
-    );
-  });
-  if(!competitive.length) return null;
-  let W=0,D=0,L=0;
-  competitive.forEach(f=>{
-    const isHome = f.teams.home.id===teamId;
-    const gh=f.goals.home, ga=f.goals.away;
-    if(gh===null||ga===null) return;
-    const r = isHome?(gh>ga?"W":gh<ga?"L":"D"):(ga>gh?"W":ga<gh?"L":"D");
-    if(r==="W")W++; else if(r==="D")D++; else L++;
-  });
-  return {W,D,L,total:W+D+L};
-}
+
 
 
 // ── UI PRIMITIVES ─────────────────────────────────────────────────────────────
@@ -1198,44 +1173,10 @@ function EloModal({team,onClose}){
   const bd=ELO_BD[team.name];
   const rank=[...TEAMS].sort((a,b)=>b.elo-a.elo).findIndex(t=>t.name===team.name)+1;
   const [hovered,setHovered]=useState(null);
-  const [teamId,setTeamId]=useState(null);
-  const [liveForm,setLiveForm]=useState(null);
-  const [liveQual,setLiveQual]=useState(null);
-  const [formState,setFormState]=useState("idle"); // idle | loading | done | error | nokey
-  const [qualState,setQualState]=useState("idle");
   if(!bd)return null;
 
-  // Look up team ID once when modal opens
-  useEffect(()=>{
-    if(!FD_KEY){setFormState("nokey");setQualState("nokey");return;}
-    fdTeamId(team.name).then(id=>{
-      if(id) setTeamId(id);
-      else {setFormState("error");setQualState("error");}
-    });
-  },[team.name]);
-
-  // Fetch form when form row hovered
-  useEffect(()=>{
-    if(hovered!=="form"||!teamId||formState!=="idle") return;
-    setFormState("loading");
-    afRecentForm(teamId).then(f=>{
-      if(f){setLiveForm(f);setFormState("done");}
-      else setFormState("error");
-    });
-  },[hovered,teamId,formState]);
-
-  // Fetch qualifying when qual row hovered
-  useEffect(()=>{
-    if(hovered!=="qual"||!teamId||qualState!=="idle") return;
-    setQualState("loading");
-    afQualRecord(teamId).then(q=>{
-      if(q){setLiveQual(q);setQualState("done");}
-      else setQualState("error");
-    });
-  },[hovered,teamId,qualState]);
-
-  const formColors={"W":"#16A34A","D":"#6B7280","L":"#C84B31"};
-  const formBg={"W":"#f0fdf4","D":"#f3f4f6","L":"#fef2f2"};
+  const espnUrl = ESPN_URLS[team.name];
+  const qualUrl = QUAL_URLS[team.conf];
 
   const rows=[
     {key:"base",label:"International baseline",  desc:"Starting point for established FIFA member nations",val:bd.b,hover:null},
@@ -1243,79 +1184,6 @@ function EloModal({team,onClose}){
     {key:"qual",label:"Qualifying campaign",      desc:"Performance in official 2026 World Cup qualifying matches",val:bd.q,hover:"qual"},
     {key:"pedi",label:"Tournament pedigree",      desc:"Historical World Cup performance, titles, and deep runs",val:bd.p,hover:null},
   ];
-
-  function FormDetail(){
-    if(formState==="nokey") return(
-      <div style={{paddingBottom:12,...B,fontSize:12,color:T.faint}}>
-        Add <code style={{background:T.bg,padding:"1px 5px",borderRadius:3}}>VITE_FOOTBALLDATA_KEY</code> in Vercel to show live results.
-      </div>
-    );
-    if(formState==="loading") return(
-      <div style={{paddingBottom:12,display:"flex",gap:8}}>
-        {[0,1,2,3,4].map(i=><div key={i} style={{width:36,height:36,borderRadius:8,background:T.border,animation:"pulse 1.2s ease infinite"}}/>)}
-      </div>
-    );
-    if(formState==="error") return(
-      <div style={{paddingBottom:12,...B,fontSize:12,color:T.red}}>Could not load live data. Check your API key or try again later.</div>
-    );
-    if(!liveForm) return null;
-    return(
-      <div style={{paddingBottom:14}}>
-        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
-          <div style={{width:6,height:6,borderRadius:"50%",background:"#16A34A"}}/>
-          <span style={{...B,fontSize:11,color:"#16A34A",fontWeight:600}}>Live · API-Football</span>
-          <span style={{...B,fontSize:11,color:T.faint,marginLeft:4}}>Last 5 matches in 2024 season · <a href="https://api-sports.io" target="_blank" rel="noopener" style={{color:T.faint}}>upgrade for 2025 data</a></span>
-        </div>
-        <div style={{display:"flex",gap:8,marginBottom:10}}>
-          {liveForm.map((res,j)=>(
-            <div key={j} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-              <div style={{width:36,height:36,borderRadius:8,background:formBg[res],border:`1.5px solid ${formColors[res]}44`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <span style={{...H,fontSize:14,fontWeight:800,color:formColors[res]}}>{res}</span>
-              </div>
-              <span style={{...B,fontSize:9,color:T.faint}}>{["5th","4th","3rd","2nd","Last"][j]}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{...B,fontSize:11,color:T.muted}}>
-          {liveForm.filter(r=>r==="W").length}W &nbsp;·&nbsp; {liveForm.filter(r=>r==="D").length}D &nbsp;·&nbsp; {liveForm.filter(r=>r==="L").length}L in last 5 matches
-        </div>
-      </div>
-    );
-  }
-
-  function QualDetail(){
-    if(qualState==="nokey") return(
-      <div style={{paddingBottom:12,...B,fontSize:12,color:T.faint}}>
-        Add <code style={{background:T.bg,padding:"1px 5px",borderRadius:3}}>VITE_FOOTBALLDATA_KEY</code> in Vercel to show live data.
-      </div>
-    );
-    if(qualState==="loading") return(
-      <div style={{paddingBottom:12,display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8}}>
-        {[0,1,2,3].map(i=><div key={i} style={{height:60,borderRadius:8,background:T.border}}/>)}
-      </div>
-    );
-    if(qualState==="error") return(
-      <div style={{paddingBottom:12,...B,fontSize:12,color:T.red}}>Could not load qualifying data. Check your API key or try again later.</div>
-    );
-    if(!liveQual) return null;
-    return(
-      <div style={{paddingBottom:14}}>
-        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
-          <div style={{width:6,height:6,borderRadius:"50%",background:"#16A34A"}}/>
-          <span style={{...B,fontSize:11,color:"#16A34A",fontWeight:600}}>Live · API-Football</span>
-          <span style={{...B,fontSize:11,color:T.faint,marginLeft:4}}>Competitive record 2023–2024 seasons</span>
-        </div>
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8}}>
-          {[["W",liveQual.W,"#16A34A","#f0fdf4"],["D",liveQual.D,"#6B7280","#f3f4f6"],["L",liveQual.L,"#C84B31","#fef2f2"],["P",liveQual.total,T.ink,T.bg]].map(([lbl,val,col,bg])=>(
-            <div key={lbl} style={{background:bg,borderRadius:8,padding:"10px 8px",textAlign:"center",border:`1px solid ${col}22`}}>
-              <div style={{...H,fontSize:22,fontWeight:800,color:col,lineHeight:1}}>{val}</div>
-              <div style={{...B,fontSize:11,color:col,marginTop:3,fontWeight:600}}>{lbl==="W"?"Wins":lbl==="D"?"Draws":lbl==="L"?"Losses":"Played"}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.6)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
@@ -1343,7 +1211,7 @@ function EloModal({team,onClose}){
             <div key={r.key}
               onMouseEnter={()=>r.hover&&setHovered(r.key)}
               onMouseLeave={()=>setHovered(null)}
-              style={{borderBottom:i<rows.length-1?`1px solid ${T.border}`:"none",cursor:r.hover?"pointer":"default"}}>
+              style={{borderBottom:i<rows.length-1?`1px solid ${T.border}`:"none"}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",gap:16}}>
                 <div style={{flex:1}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
@@ -1356,8 +1224,38 @@ function EloModal({team,onClose}){
                   {r.val>0?"+":""}{r.val.toLocaleString()}
                 </div>
               </div>
-              {r.key==="form"&&hovered==="form"&&<FormDetail/>}
-              {r.key==="qual"&&hovered==="qual"&&<QualDetail/>}
+              {/* Recent form hover — ESPN link */}
+              {r.key==="form"&&hovered==="form"&&(
+                <div style={{paddingBottom:14}}>
+                  <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.6,marginBottom:10}}>
+                    Live match results are available on ESPN — the link below opens {team.name}'s full results page directly.
+                  </div>
+                  {espnUrl?(
+                    <a href={espnUrl} target="_blank" rel="noopener noreferrer"
+                      style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 16px",borderRadius:8,background:"#CC0C00",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
+                      <span>📊</span> View {team.name} results on ESPN →
+                    </a>
+                  ):(
+                    <div style={{...B,fontSize:12,color:T.faint}}>ESPN link not available for this team.</div>
+                  )}
+                </div>
+              )}
+              {/* Qualifying campaign hover — FIFA link */}
+              {r.key==="qual"&&hovered==="qual"&&(
+                <div style={{paddingBottom:14}}>
+                  <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.6,marginBottom:10}}>
+                    Full 2026 World Cup qualifying results and tables for {team.conf} are on FIFA.com.
+                  </div>
+                  {qualUrl?(
+                    <a href={qualUrl} target="_blank" rel="noopener noreferrer"
+                      style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 16px",borderRadius:8,background:"#1a56db",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
+                      <span>🏆</span> View {team.conf} qualifying on FIFA.com →
+                    </a>
+                  ):(
+                    <div style={{...B,fontSize:12,color:T.faint}}>FIFA qualifying link not available.</div>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
