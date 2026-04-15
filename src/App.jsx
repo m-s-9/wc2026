@@ -1202,121 +1202,100 @@ function Tooltip({children,text}){
 
 // ── ELO MODAL ─────────────────────────────────────────────────────────────────
 function EloModal({team,onClose}){
-  const bd=ELO_BD[team.name];
-  const rank=[...TEAMS].sort((a,b)=>b.elo-a.elo).findIndex(t=>t.name===team.name)+1;
-  const [hovered,setHovered]=useState(null);
-  if(!bd)return null;
-
-  const eloUrl    = eloRatingsUrl(team.name);
-  const qualUrl   = QUAL_URLS[team.conf];
-  const qualPath  = QUAL_PATH[team.name];
-  const fifaUrl   = fifaTeamUrl(team.name);
-  const wcUrl     = "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/match-centre";
-
-  const rows=[
-    {key:"base",label:"International baseline",  desc:"Starting point for established FIFA member nations",val:bd.b,hover:null},
-    {key:"form",label:"WC 2026 form",            desc:"Match-by-match results during the tournament",val:bd.f,hover:"form"},
-    {key:"qual",label:"Qualifying campaign",      desc:"How they qualified for the 2026 World Cup",val:bd.q,hover:"qual"},
-    {key:"pedi",label:"Tournament pedigree",      desc:"Historical World Cup performance and titles",val:bd.p,hover:null},
-  ];
-
+  const [formOpen,setFormOpen]=useState(false);
+  const [qualOpen,setQualOpen]=useState(false);
+  const eloUrl   = eloRatingsUrl(team.name);
+  const qualUrl  = QUAL_URLS[team.conf];
+  const qualPath = QUAL_PATH[team.name];
+  const wcUrl    = "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/match-centre";
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.6)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:480,boxShadow:"0 24px 64px rgba(0,0,0,0.22)",overflow:"hidden",maxHeight:"90vh",overflowY:"auto"}}>
 
         {/* Header */}
-        <div style={{background:T.redLight,padding:"18px 24px",borderBottom:`1px solid ${T.redMid}`,display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0}}>
+        <div style={{background:T.redLight,padding:"18px 24px",borderBottom:`1px solid ${T.redMid}`,display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,zIndex:10}}>
           <div style={{display:"flex",gap:12,alignItems:"center"}}>
-            <Flag code={team.code} size={36}/>
+            <Flag code={team.code} size={40}/>
             <div>
-              <div style={{...H,fontSize:18,fontWeight:800,color:T.ink}}>{team.name}</div>
-              <div style={{...B,fontSize:12,color:T.muted}}>Elo rank #{rank} · FIFA #{team.rank} (April 2026)</div>
+              <div style={{...H,fontSize:19,fontWeight:800,color:T.ink}}>{team.name}</div>
+              <div style={{...B,fontSize:12,color:T.muted,marginTop:2}}>
+                <Tag color={CC[team.conf]||T.muted}>{team.conf}</Tag>
+                <span style={{marginLeft:8}}>FIFA #{team.rank} · April 2026</span>
+              </div>
             </div>
           </div>
-          {/* Elo number links to eloratings.net */}
-          <a href={eloUrl} target="_blank" rel="noopener noreferrer" style={{textAlign:"right",textDecoration:"none"}}>
-            <div style={{...H,fontSize:28,fontWeight:800,color:T.red,lineHeight:1}}>{team.elo}</div>
-            <div style={{...B,fontSize:10,color:T.red,marginTop:2,textDecoration:"underline dotted"}}>eloratings.net ↗</div>
-          </a>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:20,color:T.faint,cursor:"pointer",padding:4}}>✕</button>
         </div>
 
-        {/* Context note */}
-        <div style={{padding:"14px 24px 0",...B,fontSize:13,color:T.muted,lineHeight:1.6}}>{bd.note}</div>
+        <div style={{padding:"20px 24px",display:"flex",flexDirection:"column",gap:14}}>
 
-        {/* Breakdown rows */}
-        <div style={{padding:"12px 24px 0"}}>
-          <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:8}}>Rating breakdown</div>
-          {rows.map((r,i)=>(
-            <div key={r.key}
-              onMouseEnter={()=>r.hover&&setHovered(r.key)}
-              onMouseLeave={()=>setHovered(null)}
-              style={{borderBottom:i<rows.length-1?`1px solid ${T.border}`:"none"}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",padding:"10px 0",gap:16,cursor:r.hover?"pointer":"default"}}>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
-                    <div style={{...B,fontSize:13,fontWeight:500,color:T.ink}}>{r.label}</div>
-                    {r.hover&&<span style={{...B,fontSize:9,color:T.faint,border:`1px solid ${T.border}`,borderRadius:3,padding:"1px 5px"}}>hover</span>}
-                  </div>
-                  <div style={{...B,fontSize:11,color:T.faint}}>{r.desc}</div>
-                </div>
-                <div style={{...H,fontSize:15,fontWeight:700,color:r.val>0?T.red:r.val<0?"#2563EB":T.ink,minWidth:48,textAlign:"right",flexShrink:0}}>
-                  {r.val>0?"+":""}{r.val.toLocaleString()}
-                </div>
-              </div>
-
-              {/* WC 2026 Form hover */}
-              {r.key==="form"&&hovered==="form"&&(
-                <div style={{paddingBottom:14,borderTop:`1px dashed ${T.border}`,paddingTop:12}}>
-                  <div style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:12,padding:"10px 14px",background:"#FFF8F0",borderRadius:8,border:"1px solid #F0C84B44"}}>
-                    <span style={{fontSize:18}}>⏳</span>
-                    <div>
-                      <div style={{...H,fontSize:13,fontWeight:700,color:T.ink,marginBottom:3}}>Tournament begins June 11, 2026</div>
-                      <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.5}}>
-                        {team.name}'s match-by-match World Cup results will be sourced directly from FIFA once the tournament is live.
-                      </div>
-                    </div>
-                  </div>
-                  <a href={wcUrl} target="_blank" rel="noopener noreferrer"
-                    style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 16px",borderRadius:8,background:T.red,color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
-                    🏆 FIFA WC 2026 Match Centre →
-                  </a>
-                </div>
-              )}
-
-              {/* Qualifying Campaign hover */}
-              {r.key==="qual"&&hovered==="qual"&&(
-                <div style={{paddingBottom:14,borderTop:`1px dashed ${T.border}`,paddingTop:12}}>
-                  {qualPath&&(
-                    <div style={{padding:"10px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`,marginBottom:12}}>
-                      <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1,color:T.faint,textTransform:"uppercase",marginBottom:4}}>Qualified as</div>
-                      <div style={{...H,fontSize:14,fontWeight:700,color:T.ink}}>{qualPath}</div>
-                    </div>
-                  )}
-                  <a href={qualUrl} target="_blank" rel="noopener noreferrer"
-                    style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 16px",borderRadius:8,background:"#1a56db",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
-                    📋 Full {team.conf} qualifying on Wikipedia →
-                  </a>
-                </div>
-              )}
+          {/* Elo rating — link to eloratings.net */}
+          <div style={{padding:"14px 16px",background:T.bg,borderRadius:10,border:`1px solid ${T.border}`}}>
+            <div style={{...B,fontSize:11,fontWeight:600,letterSpacing:1.2,color:T.faint,textTransform:"uppercase",marginBottom:8}}>Elo Rating</div>
+            <div style={{...B,fontSize:13,color:T.muted,lineHeight:1.6,marginBottom:12}}>
+              The World Football Elo Rating is the most predictive ranking system for international football — updated after every competitive match.
             </div>
-          ))}
-        </div>
-
-        {/* Total */}
-        <div style={{padding:"8px 24px 16px"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`}}>
-            <div style={{...H,fontSize:14,fontWeight:700,color:T.ink}}>Total Elo Rating</div>
-            <a href={eloUrl} target="_blank" rel="noopener noreferrer" style={{textDecoration:"none",display:"flex",alignItems:"center",gap:6}}>
-              <div style={{...H,fontSize:22,fontWeight:800,color:T.red}}>{team.elo}</div>
-              <span style={{...B,fontSize:10,color:T.red,textDecoration:"underline dotted"}}>verify ↗</span>
+            <a href={eloUrl} target="_blank" rel="noopener noreferrer"
+              style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 18px",borderRadius:8,background:T.red,color:"#fff",textDecoration:"none",...H,fontSize:14,fontWeight:700}}>
+              📊 View {team.name} Elo on eloratings.net ↗
             </a>
           </div>
-          <div style={{...B,fontSize:11,color:T.faint,marginTop:8,lineHeight:1.5}}>
-            Elo ratings sourced from <a href="https://www.eloratings.net" target="_blank" rel="noopener noreferrer" style={{color:T.red,textDecoration:"none"}}>eloratings.net</a> · A 200-point gap equals approx. 76% win probability for the stronger side.
+
+          {/* WC 2026 Form */}
+          <div style={{borderRadius:10,border:`1px solid ${T.border}`,overflow:"hidden"}}>
+            <button onClick={()=>setFormOpen(!formOpen)}
+              style={{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",padding:"13px 16px",background:formOpen?T.redLight:T.surface,border:"none",cursor:"pointer",...B,fontSize:14,fontWeight:600,color:T.ink}}>
+              <span>🏆 WC 2026 Form</span>
+              <span style={{color:T.faint,fontSize:18}}>{formOpen?"−":"+"}</span>
+            </button>
+            {formOpen&&(
+              <div style={{padding:"14px 16px",borderTop:`1px solid ${T.border}`,background:T.surface}}>
+                <div style={{display:"flex",gap:10,alignItems:"flex-start",padding:"12px 14px",background:"#FFF8F0",borderRadius:8,border:"1px solid #F0C84B55",marginBottom:14}}>
+                  <span style={{fontSize:20}}>⏳</span>
+                  <div>
+                    <div style={{...H,fontSize:13,fontWeight:700,color:T.ink,marginBottom:4}}>Tournament begins June 11, 2026</div>
+                    <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.6}}>
+                      {team.name}'s match-by-match World Cup results will be updated here as the tournament progresses. Check back from June 11.
+                    </div>
+                  </div>
+                </div>
+                <a href={wcUrl} target="_blank" rel="noopener noreferrer"
+                  style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 16px",borderRadius:8,background:T.red,color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
+                  🏆 FIFA WC 2026 Match Centre ↗
+                </a>
+              </div>
+            )}
           </div>
-        </div>
-        <div style={{padding:"0 24px 18px"}}>
-          <button onClick={onClose} style={{...B,width:"100%",padding:"9px",borderRadius:8,border:`1px solid ${T.border}`,background:T.bg,color:T.muted,fontSize:13,cursor:"pointer"}}>Close</button>
+
+          {/* Qualifying Campaign */}
+          <div style={{borderRadius:10,border:`1px solid ${T.border}`,overflow:"hidden"}}>
+            <button onClick={()=>setQualOpen(!qualOpen)}
+              style={{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",padding:"13px 16px",background:qualOpen?T.redLight:T.surface,border:"none",cursor:"pointer",...B,fontSize:14,fontWeight:600,color:T.ink}}>
+              <span>📋 Qualifying Campaign</span>
+              <span style={{color:T.faint,fontSize:18}}>{qualOpen?"−":"+"}</span>
+            </button>
+            {qualOpen&&(
+              <div style={{padding:"14px 16px",borderTop:`1px solid ${T.border}`,background:T.surface}}>
+                {qualPath&&(
+                  <div style={{padding:"12px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`,marginBottom:14}}>
+                    <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.2,color:T.faint,textTransform:"uppercase",marginBottom:5}}>How they qualified</div>
+                    <div style={{...H,fontSize:15,fontWeight:700,color:T.ink}}>{qualPath}</div>
+                  </div>
+                )}
+                <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.6,marginBottom:12}}>
+                  Full group tables, results, and match-by-match records for all {team.conf} qualifying are on Wikipedia.
+                </div>
+                <a href={qualUrl} target="_blank" rel="noopener noreferrer"
+                  style={{display:"inline-flex",alignItems:"center",gap:8,padding:"8px 16px",borderRadius:8,background:"#1a56db",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
+                  📋 Full {team.conf} qualifying on Wikipedia ↗
+                </a>
+              </div>
+            )}
+          </div>
+
+          <div style={{...B,fontSize:11,color:T.faint,lineHeight:1.5,textAlign:"center"}}>
+            Elo data sourced from <a href="https://www.eloratings.net" target="_blank" rel="noopener noreferrer" style={{color:T.red,textDecoration:"none"}}>eloratings.net</a> · FIFA rankings as of April 1, 2026 · Qualifying data via Wikipedia
+          </div>
         </div>
       </div>
     </div>
@@ -1524,8 +1503,8 @@ function TeamsSection(){
               <div style={{...H,fontSize:20,fontWeight:800,color:T.ink}}>{team.name}</div>
               <div style={{display:"flex",gap:8,marginTop:3,alignItems:"center"}}>
                 <Tag color={CC[team.conf]||T.muted}>{team.conf}</Tag>
-                <button onClick={()=>setEloTeam(team)} style={{...B,fontSize:11,color:T.red,background:"none",border:"none",cursor:"pointer",padding:0,fontWeight:600,textDecoration:"underline dotted",textUnderlineOffset:2}}>
-                  Elo: {team.elo}
+                <button onClick={()=>setEloTeam(team)} style={{...B,fontSize:11,color:T.red,background:"none",border:"none",cursor:"pointer",padding:0,fontWeight:500}}>
+                  Elo ↗
                 </button>
               </div>
             </div>
@@ -1582,8 +1561,8 @@ function TeamsSection(){
         <div style={{...H,fontSize:13,fontWeight:700,color:T.ink,marginBottom:5,lineHeight:1.2,paddingRight:36}}>{t.name}</div>
         <Tag color={CC[t.conf]||T.muted}>{t.conf}</Tag>
         <div style={{display:"flex",gap:12,alignItems:"center",marginTop:8,flexWrap:"wrap"}}>
-          <button onClick={e=>{e.stopPropagation();setEloTeam(t);}} style={{...B,fontSize:10,color:T.red,background:"none",border:"none",cursor:"pointer",padding:0,fontWeight:600,textDecoration:"underline dotted",textUnderlineOffset:2}}>
-            Elo: {t.elo}
+          <button onClick={e=>{e.stopPropagation();setEloTeam(t);}} style={{...B,fontSize:10,color:T.red,background:"none",border:"none",cursor:"pointer",padding:0,fontWeight:500,display:"flex",alignItems:"center",gap:3}}>
+            Elo ↗
           </button>
           <span style={{...B,fontSize:10,color:T.faint}}>FIFA #{t.rank}</span>
         </div>
