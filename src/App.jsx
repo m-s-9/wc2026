@@ -1070,6 +1070,78 @@ async function callClaude(prompt,sys="",search=false){
   return d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
 }
 
+// ── API-FOOTBALL ──────────────────────────────────────────────────────────────
+const AF_KEY = import.meta.env.VITE_APIFOOTBALL_KEY || "";
+const AF_BASE = "https://v3.api-football.com";
+const _afCache = {};
+
+async function afGet(path){
+  if(_afCache[path]) return _afCache[path];
+  if(!AF_KEY) return null;
+  try{
+    const r = await fetch(AF_BASE+path,{headers:{"x-apisports-key":AF_KEY}});
+    if(!r.ok) return null;
+    const d = await r.json();
+    _afCache[path] = d;
+    return d;
+  }catch{ return null; }
+}
+
+// Team IDs cached in localStorage to preserve daily quota
+function getCachedId(name){ try{ return JSON.parse(localStorage.getItem("af_ids")||"{}")[name]||null; }catch{return null;} }
+function setCachedId(name,id){ try{ const m=JSON.parse(localStorage.getItem("af_ids")||"{}"); m[name]=id; localStorage.setItem("af_ids",JSON.stringify(m)); }catch{} }
+
+async function afTeamId(name){
+  const cached = getCachedId(name);
+  if(cached) return cached;
+  // API-Football uses different names for some teams — map the tricky ones
+  const nameMap = {
+    "England":"England","USA":"United States","South Korea":"Korea Republic",
+    "Türkiye":"Turkey","Ivory Coast":"Côte d'Ivoire","DR Congo":"DR Congo",
+    "Bosnia and Herzegovina":"Bosnia","New Zealand":"New Zealand","Curaçao":"Curacao",
+  };
+  const searchName = nameMap[name] || name;
+  const d = await afGet(`/teams?name=${encodeURIComponent(searchName)}&type=national`);
+  const id = d?.response?.[0]?.team?.id || null;
+  if(id) setCachedId(name, id);
+  return id;
+}
+
+async function afRecentForm(teamId){
+  const d = await afGet(`/fixtures?team=${teamId}&last=5`);
+  if(!d?.response?.length) return null;
+  // API returns newest first — reverse so oldest→newest
+  return [...d.response].reverse().map(f=>{
+    const isHome = f.teams.home.id === teamId;
+    const gh = f.goals.home, ga = f.goals.away;
+    if(gh===null||ga===null) return null;
+    if(isHome) return gh>ga?"W":gh<ga?"L":"D";
+    return ga>gh?"W":ga<gh?"L":"D";
+  }).filter(Boolean);
+}
+
+async function afQualRecord(teamId){
+  // WC 2026 qualifying window: Sept 2023 – April 2026
+  const d = await afGet(`/fixtures?team=${teamId}&from=2023-09-01&to=2026-04-01&status=FT`);
+  if(!d?.response) return null;
+  // Filter to qualifying / World Cup competition type — exclude friendlies
+  const qual = d.response.filter(f=>{
+    const n = (f.league.name||"").toLowerCase();
+    return n.includes("qualif") || n.includes("world cup") || n.includes("playoff") || n.includes("play-off");
+  });
+  if(!qual.length) return null;
+  let W=0,D=0,L=0;
+  qual.forEach(f=>{
+    const isHome = f.teams.home.id===teamId;
+    const gh=f.goals.home, ga=f.goals.away;
+    if(gh===null||ga===null) return;
+    const r = isHome?(gh>ga?"W":gh<ga?"L":"D"):(ga>gh?"W":ga<gh?"L":"D");
+    if(r==="W")W++; else if(r==="D")D++; else L++;
+  });
+  return {W,D,L,total:W+D+L};
+}
+
+
 // ── UI PRIMITIVES ─────────────────────────────────────────────────────────────
 function Flag({code,size=32}){
   return <img src={`https://flagcdn.com/w${size*2}/${code}.png`} alt={code} style={{width:size,height:"auto",borderRadius:2,display:"block",flexShrink:0}} onError={e=>e.target.style.display="none"} />;
@@ -1105,25 +1177,135 @@ function EloModal({team,onClose}){
   const bd=ELO_BD[team.name];
   const rank=[...TEAMS].sort((a,b)=>b.elo-a.elo).findIndex(t=>t.name===team.name)+1;
   const [hovered,setHovered]=useState(null);
+  const [teamId,setTeamId]=useState(null);
+  const [liveForm,setLiveForm]=useState(null);
+  const [liveQual,setLiveQual]=useState(null);
+  const [formState,setFormState]=useState("idle"); // idle | loading | done | error | nokey
+  const [qualState,setQualState]=useState("idle");
   if(!bd)return null;
-  const formColors={"W":"#16A34A","D":"#555","L":"#C84B31"};
-  const formBg={"W":"#f0fdf4","D":"#f5f5f5","L":"#fef2f2"};
+
+  // Look up team ID once when modal opens
+  useEffect(()=>{
+    if(!AF_KEY){setFormState("nokey");setQualState("nokey");return;}
+    afTeamId(team.name).then(id=>{
+      if(id) setTeamId(id);
+      else {setFormState("error");setQualState("error");}
+    });
+  },[team.name]);
+
+  // Fetch form when form row hovered
+  useEffect(()=>{
+    if(hovered!=="form"||!teamId||formState!=="idle") return;
+    setFormState("loading");
+    afRecentForm(teamId).then(f=>{
+      if(f){setLiveForm(f);setFormState("done");}
+      else setFormState("error");
+    });
+  },[hovered,teamId,formState]);
+
+  // Fetch qualifying when qual row hovered
+  useEffect(()=>{
+    if(hovered!=="qual"||!teamId||qualState!=="idle") return;
+    setQualState("loading");
+    afQualRecord(teamId).then(q=>{
+      if(q){setLiveQual(q);setQualState("done");}
+      else setQualState("error");
+    });
+  },[hovered,teamId,qualState]);
+
+  const formColors={"W":"#16A34A","D":"#6B7280","L":"#C84B31"};
+  const formBg={"W":"#f0fdf4","D":"#f3f4f6","L":"#fef2f2"};
+
   const rows=[
-    {key:"base",  label:"International baseline",  desc:"Starting point for all established FIFA member nations",val:bd.b, hover:null},
-    {key:"form",  label:"Recent form",              desc:"Adjusted based on results in the 18 months prior",       val:bd.f, hover:"form"},
-    {key:"qual",  label:"Qualifying campaign",      desc:"Performance during official 2026 World Cup qualifying",   val:bd.q, hover:"qual"},
-    {key:"pedi",  label:"Tournament pedigree",      desc:"Historical World Cup performance, titles, and deep runs", val:bd.p, hover:null},
+    {key:"base",label:"International baseline",  desc:"Starting point for established FIFA member nations",val:bd.b,hover:null},
+    {key:"form",label:"Recent form",              desc:"Based on results in the 18 months prior to the tournament",val:bd.f,hover:"form"},
+    {key:"qual",label:"Qualifying campaign",      desc:"Performance in official 2026 World Cup qualifying matches",val:bd.q,hover:"qual"},
+    {key:"pedi",label:"Tournament pedigree",      desc:"Historical World Cup performance, titles, and deep runs",val:bd.p,hover:null},
   ];
+
+  function FormDetail(){
+    if(formState==="nokey") return(
+      <div style={{paddingBottom:12,...B,fontSize:12,color:T.faint}}>
+        Add <code style={{background:T.bg,padding:"1px 5px",borderRadius:3}}>VITE_APIFOOTBALL_KEY</code> in Vercel to show live results.
+      </div>
+    );
+    if(formState==="loading") return(
+      <div style={{paddingBottom:12,display:"flex",gap:8}}>
+        {[0,1,2,3,4].map(i=><div key={i} style={{width:36,height:36,borderRadius:8,background:T.border,animation:"pulse 1.2s ease infinite"}}/>)}
+      </div>
+    );
+    if(formState==="error") return(
+      <div style={{paddingBottom:12,...B,fontSize:12,color:T.red}}>Could not load live data. Check your API key or try again later.</div>
+    );
+    if(!liveForm) return null;
+    return(
+      <div style={{paddingBottom:14}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:"#16A34A"}}/>
+          <span style={{...B,fontSize:11,color:"#16A34A",fontWeight:600}}>Live · API-Football</span>
+          <span style={{...B,fontSize:11,color:T.faint,marginLeft:4}}>Last 5 matches (oldest → most recent)</span>
+        </div>
+        <div style={{display:"flex",gap:8,marginBottom:10}}>
+          {liveForm.map((res,j)=>(
+            <div key={j} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+              <div style={{width:36,height:36,borderRadius:8,background:formBg[res],border:`1.5px solid ${formColors[res]}44`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <span style={{...H,fontSize:14,fontWeight:800,color:formColors[res]}}>{res}</span>
+              </div>
+              <span style={{...B,fontSize:9,color:T.faint}}>{["5th","4th","3rd","2nd","Last"][j]}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{...B,fontSize:11,color:T.muted}}>
+          {liveForm.filter(r=>r==="W").length}W &nbsp;·&nbsp; {liveForm.filter(r=>r==="D").length}D &nbsp;·&nbsp; {liveForm.filter(r=>r==="L").length}L in last 5 matches
+        </div>
+      </div>
+    );
+  }
+
+  function QualDetail(){
+    if(qualState==="nokey") return(
+      <div style={{paddingBottom:12,...B,fontSize:12,color:T.faint}}>
+        Add <code style={{background:T.bg,padding:"1px 5px",borderRadius:3}}>VITE_APIFOOTBALL_KEY</code> in Vercel to show live data.
+      </div>
+    );
+    if(qualState==="loading") return(
+      <div style={{paddingBottom:12,display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8}}>
+        {[0,1,2,3].map(i=><div key={i} style={{height:60,borderRadius:8,background:T.border}}/>)}
+      </div>
+    );
+    if(qualState==="error") return(
+      <div style={{paddingBottom:12,...B,fontSize:12,color:T.red}}>Could not load qualifying data. Check your API key or try again later.</div>
+    );
+    if(!liveQual) return null;
+    return(
+      <div style={{paddingBottom:14}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:10}}>
+          <div style={{width:6,height:6,borderRadius:"50%",background:"#16A34A"}}/>
+          <span style={{...B,fontSize:11,color:"#16A34A",fontWeight:600}}>Live · API-Football</span>
+          <span style={{...B,fontSize:11,color:T.faint,marginLeft:4}}>2026 World Cup qualifying record</span>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8}}>
+          {[["W",liveQual.W,"#16A34A","#f0fdf4"],["D",liveQual.D,"#6B7280","#f3f4f6"],["L",liveQual.L,"#C84B31","#fef2f2"],["P",liveQual.total,T.ink,T.bg]].map(([lbl,val,col,bg])=>(
+            <div key={lbl} style={{background:bg,borderRadius:8,padding:"10px 8px",textAlign:"center",border:`1px solid ${col}22`}}>
+              <div style={{...H,fontSize:22,fontWeight:800,color:col,lineHeight:1}}>{val}</div>
+              <div style={{...B,fontSize:11,color:col,marginTop:3,fontWeight:600}}>{lbl==="W"?"Wins":lbl==="D"?"Draws":lbl==="L"?"Losses":"Played"}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return(
     <div style={{position:"fixed",inset:0,background:"rgba(17,17,17,0.6)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}} onClick={onClose}>
-      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:480,boxShadow:"0 24px 64px rgba(0,0,0,0.22)",overflow:"hidden"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:T.surface,borderRadius:16,width:"100%",maxWidth:480,boxShadow:"0 24px 64px rgba(0,0,0,0.22)",overflow:"hidden",maxHeight:"90vh",overflowY:"auto"}}>
         {/* Header */}
-        <div style={{background:T.redLight,padding:"18px 24px",borderBottom:`1px solid ${T.redMid}`,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <div style={{background:T.redLight,padding:"18px 24px",borderBottom:`1px solid ${T.redMid}`,display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0}}>
           <div style={{display:"flex",gap:12,alignItems:"center"}}>
             <Flag code={team.code} size={36}/>
             <div>
               <div style={{...H,fontSize:18,fontWeight:800,color:T.ink}}>{team.name}</div>
-              <div style={{...B,fontSize:12,color:T.muted}}>Ranked #{rank} by Elo · FIFA #{team.rank} (April 2026)</div>
+              <div style={{...B,fontSize:12,color:T.muted}}>Elo rank #{rank} · FIFA #{team.rank} (April 2026)</div>
             </div>
           </div>
           <div style={{textAlign:"right"}}>
@@ -1131,9 +1313,9 @@ function EloModal({team,onClose}){
             <div style={{...B,fontSize:10,color:T.faint}}>Elo rating</div>
           </div>
         </div>
-        {/* Note */}
+        {/* Context note */}
         <div style={{padding:"14px 24px 0",...B,fontSize:13,color:T.muted,lineHeight:1.6}}>{bd.note}</div>
-        {/* Breakdown rows */}
+        {/* Breakdown */}
         <div style={{padding:"12px 24px 0"}}>
           <div style={{...B,fontSize:10,fontWeight:600,letterSpacing:1.5,color:T.faint,textTransform:"uppercase",marginBottom:8}}>Rating breakdown</div>
           {rows.map((r,i)=>(
@@ -1145,7 +1327,7 @@ function EloModal({team,onClose}){
                 <div style={{flex:1}}>
                   <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
                     <div style={{...B,fontSize:13,fontWeight:500,color:T.ink}}>{r.label}</div>
-                    {r.hover&&<span style={{...B,fontSize:10,color:T.faint,border:`1px solid ${T.border}`,borderRadius:3,padding:"1px 5px"}}>hover for detail</span>}
+                    {r.hover&&<span style={{...B,fontSize:9,color:T.faint,border:`1px solid ${T.border}`,borderRadius:3,padding:"1px 5px"}}>hover</span>}
                   </div>
                   <div style={{...B,fontSize:11,color:T.faint}}>{r.desc}</div>
                 </div>
@@ -1153,43 +1335,8 @@ function EloModal({team,onClose}){
                   {r.val>0?"+":""}{r.val.toLocaleString()}
                 </div>
               </div>
-              {/* Hover detail — Recent form */}
-              {r.hover==="form"&&hovered==="form"&&(
-                <div style={{paddingBottom:12}}>
-                  <div style={{...B,fontSize:11,color:T.faint,marginBottom:8}}>Last 5 matches (oldest → most recent)</div>
-                  <div style={{display:"flex",gap:8}}>
-                    {bd.form.map((res,j)=>(
-                      <div key={j} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-                        <div style={{width:36,height:36,borderRadius:8,background:formBg[res],border:`1px solid ${formColors[res]}33`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                          <span style={{...H,fontSize:14,fontWeight:800,color:formColors[res]}}>{res}</span>
-                        </div>
-                        <span style={{...B,fontSize:9,color:T.faint}}>{["5th","4th","3rd","2nd","Last"][j]}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{...B,fontSize:11,color:T.muted,marginTop:8}}>
-                    {bd.form.filter(r=>r==="W").length}W · {bd.form.filter(r=>r==="D").length}D · {bd.form.filter(r=>r==="L").length}L in last 5
-                  </div>
-                </div>
-              )}
-              {/* Hover detail — Qualifying */}
-              {r.hover==="qual"&&hovered==="qual"&&(
-                <div style={{paddingBottom:12}}>
-                  <div style={{...B,fontSize:11,color:T.faint,marginBottom:8}}>Official 2026 qualifying record</div>
-                  <div style={{display:"flex",gap:10}}>
-                    {[["W",bd.qW,"#16A34A","#f0fdf4"],["D",bd.qD,"#555","#f5f5f5"],["L",bd.qL,"#C84B31","#fef2f2"]].map(([lbl,val,col,bg])=>(
-                      <div key={lbl} style={{flex:1,background:bg,borderRadius:8,padding:"10px 8px",textAlign:"center",border:`1px solid ${col}22`}}>
-                        <div style={{...H,fontSize:22,fontWeight:800,color:col,lineHeight:1}}>{val}</div>
-                        <div style={{...B,fontSize:11,color:col,marginTop:3,fontWeight:600}}>{lbl==="W"?"Wins":lbl==="D"?"Draws":"Losses"}</div>
-                      </div>
-                    ))}
-                    <div style={{flex:1,background:T.bg,borderRadius:8,padding:"10px 8px",textAlign:"center",border:`1px solid ${T.border}`}}>
-                      <div style={{...H,fontSize:22,fontWeight:800,color:T.ink,lineHeight:1}}>{bd.qW+bd.qD+bd.qL}</div>
-                      <div style={{...B,fontSize:11,color:T.muted,marginTop:3,fontWeight:600}}>Played</div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {r.key==="form"&&hovered==="form"&&<FormDetail/>}
+              {r.key==="qual"&&hovered==="qual"&&<QualDetail/>}
             </div>
           ))}
         </div>
@@ -1200,7 +1347,7 @@ function EloModal({team,onClose}){
             <div style={{...H,fontSize:22,fontWeight:800,color:T.red}}>{team.elo}</div>
           </div>
           <div style={{...B,fontSize:11,color:T.faint,marginTop:8,lineHeight:1.5}}>
-            A 200-point Elo gap between two teams equals approx. 76% win probability for the stronger side.
+            A 200-point Elo gap equals approx. 76% win probability for the stronger side.
           </div>
         </div>
         <div style={{padding:"0 24px 18px"}}>
