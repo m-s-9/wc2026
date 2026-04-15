@@ -334,7 +334,7 @@ async function callClaude(prompt,sys="",search=false){
 
 // ── UI PRIMITIVES ─────────────────────────────────────────────────────────────
 function Flag({code,size=32}){
-  return <img src={`https://flagcdn.com/w${size*2}/${code}.png`} alt={code} style={{width:size,height:"auto",borderRadius:2,display:"block",flexShrink:0}} onError={e=>e.target.style.display="none"} />;
+  return <img src={`https://flagcdn.com/w80/${code}.png`} alt={code} style={{width:size,height:"auto",borderRadius:2,display:"block",flexShrink:0}} onError={e=>e.target.style.display="none"} />;
 }
 function Tag({children,color}){
   return <span style={{...B,fontSize:10,fontWeight:600,letterSpacing:.8,padding:"2px 7px",borderRadius:4,background:color+"18",color,textTransform:"uppercase",display:"inline-block"}}>{children}</span>;
