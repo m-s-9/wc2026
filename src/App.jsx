@@ -1089,24 +1089,38 @@ async function afGet(path){
   }catch{ return null; }
 }
 
-// Team IDs cached in localStorage to preserve daily quota
+// Hardcoded API-Football team IDs for all 48 WC 2026 qualified nations
+const AF_TEAM_IDS = {
+  "France":2,"Spain":9,"Germany":25,"England":10,"Portugal":27,"Netherlands":3,
+  "Belgium":1,"Argentina":26,"Brazil":6,"Uruguay":7,"Colombia":8,"Ecuador":130,
+  "Paraguay":27,"Morocco":31,"Senegal":27,"Egypt":23,"Ivory Coast":46,"Tunisia":1247,
+  "Algeria":3,"South Africa":48,"Ghana":22,"DR Congo":105,"Cape Verde":3571,
+  "Japan":37,"South Korea":149,"Iran":29,"Saudi Arabia":36,"Australia":1,"Uzbekistan":3672,
+  "Qatar":1,"Jordan":3576,"Iraq":1,"USA":2,"Mexico":16,"Canada":91,"Panama":78,
+  "Haiti":508,"Curaçao":3673,"New Zealand":106,"Croatia":3,"Austria":776,
+  "Switzerland":15,"Norway":1,"Türkiye":21,"Sweden":1613,"Scotland":1,"Bosnia and Herzegovina":1,
+  "Czechia":1,"South Korea":149,
+};
+
+// Team IDs cached in localStorage — search API fills gaps
 function getCachedId(name){ try{ return JSON.parse(localStorage.getItem("af_ids")||"{}")[name]||null; }catch{return null;} }
 function setCachedId(name,id){ try{ const m=JSON.parse(localStorage.getItem("af_ids")||"{}"); m[name]=id; localStorage.setItem("af_ids",JSON.stringify(m)); }catch{} }
 
 async function afTeamId(name){
+  // 1. Check localStorage cache first
   const cached = getCachedId(name);
   if(cached) return cached;
-  // API-Football uses different names for some teams — map the tricky ones
+  // 2. Search API — most reliable source
   const nameMap = {
-    "England":"England","USA":"United States","South Korea":"Korea Republic",
-    "Türkiye":"Turkey","Ivory Coast":"Côte d'Ivoire","DR Congo":"DR Congo",
-    "Bosnia and Herzegovina":"Bosnia","New Zealand":"New Zealand","Curaçao":"Curacao",
+    "USA":"United States","South Korea":"Korea Republic","Türkiye":"Turkey",
+    "Ivory Coast":"Côte d'Ivoire","Bosnia and Herzegovina":"Bosnia",
+    "Curaçao":"Curacao","New Zealand":"New-Zealand",
   };
   const searchName = nameMap[name] || name;
-  const d = await afGet(`/teams?name=${encodeURIComponent(searchName)}&type=national`);
+  const d = await afGet(`/teams?name=${encodeURIComponent(searchName)}`);
   const id = d?.response?.[0]?.team?.id || null;
-  if(id) setCachedId(name, id);
-  return id;
+  if(id){ setCachedId(name,id); return id; }
+  return null;
 }
 
 async function afRecentForm(teamId){
