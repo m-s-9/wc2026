@@ -1070,18 +1070,20 @@ async function callClaude(prompt,sys="",search=false){
   return d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
 }
 
-// ── API-FOOTBALL ──────────────────────────────────────────────────────────────
+// ── API-FOOTBALL — proxied via /api/football to avoid CORS ───────────────────
 const AF_KEY = import.meta.env.VITE_APIFOOTBALL_KEY || "";
-const AF_BASE = "https://v3.football.api-sports.io";
 const _afCache = {};
 
 async function afGet(path){
   if(_afCache[path]) return _afCache[path];
   if(!AF_KEY) return null;
   try{
-    const r = await fetch(AF_BASE+path,{headers:{"x-apisports-key":AF_KEY}});
+    // Route through our Vercel serverless proxy — avoids CORS
+    const p = path.startsWith("/") ? path.slice(1) : path;
+    const r = await fetch(`/api/football?p=${encodeURIComponent(p)}`);
     if(!r.ok) return null;
     const d = await r.json();
+    if(d.error) return null;
     _afCache[path] = d;
     return d;
   }catch{ return null; }
