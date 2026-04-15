@@ -1070,67 +1070,35 @@ async function callClaude(prompt,sys="",search=false){
   return d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
 }
 
-// ── ESPN / FIFA LINKS — direct links instead of live API ─────────────────────
-// ESPN national team URLs: espn.com/soccer/team/results/_/id/{id}/{slug}
-const ESPN_URLS = {
-  "France":       "https://www.espn.com/soccer/team/results/_/id/2/france",
-  "England":      "https://www.espn.com/soccer/team/results/_/id/3/england",
-  "Spain":        "https://www.espn.com/soccer/team/results/_/id/164/spain",
-  "Germany":      "https://www.espn.com/soccer/team/results/_/id/12/germany",
-  "Portugal":     "https://www.espn.com/soccer/team/results/_/id/14/portugal",
-  "Netherlands":  "https://www.espn.com/soccer/team/results/_/id/17/netherlands",
-  "Belgium":      "https://www.espn.com/soccer/team/results/_/id/4/belgium",
-  "Croatia":      "https://www.espn.com/soccer/team/results/_/id/45/croatia",
-  "Austria":      "https://www.espn.com/soccer/team/results/_/id/44/austria",
-  "Switzerland":  "https://www.espn.com/soccer/team/results/_/id/24/switzerland",
-  "Norway":       "https://www.espn.com/soccer/team/results/_/id/20/norway",
-  "Türkiye":      "https://www.espn.com/soccer/team/results/_/id/26/turkey",
-  "Sweden":       "https://www.espn.com/soccer/team/results/_/id/23/sweden",
-  "Scotland":     "https://www.espn.com/soccer/team/results/_/id/22/scotland",
-  "Bosnia and Herzegovina": "https://www.espn.com/soccer/team/results/_/id/467/bosnia-and-herzegovina",
-  "Czechia":      "https://www.espn.com/soccer/team/results/_/id/46/czech-republic",
-  "Argentina":    "https://www.espn.com/soccer/team/results/_/id/9/argentina",
-  "Brazil":       "https://www.espn.com/soccer/team/results/_/id/6/brazil",
-  "Uruguay":      "https://www.espn.com/soccer/team/results/_/id/27/uruguay",
-  "Colombia":     "https://www.espn.com/soccer/team/results/_/id/8/colombia",
-  "Ecuador":      "https://www.espn.com/soccer/team/results/_/id/107/ecuador",
-  "Paraguay":     "https://www.espn.com/soccer/team/results/_/id/16/paraguay",
-  "Morocco":      "https://www.espn.com/soccer/team/results/_/id/207/morocco",
-  "Senegal":      "https://www.espn.com/soccer/team/results/_/id/221/senegal",
-  "Egypt":        "https://www.espn.com/soccer/team/results/_/id/186/egypt",
-  "Ivory Coast":  "https://www.espn.com/soccer/team/results/_/id/182/ivory-coast",
-  "Tunisia":      "https://www.espn.com/soccer/team/results/_/id/224/tunisia",
-  "South Africa": "https://www.espn.com/soccer/team/results/_/id/222/south-africa",
-  "Algeria":      "https://www.espn.com/soccer/team/results/_/id/172/algeria",
-  "Ghana":        "https://www.espn.com/soccer/team/results/_/id/191/ghana",
-  "DR Congo":     "https://www.espn.com/soccer/team/results/_/id/184/dr-congo",
-  "Cape Verde":   "https://www.espn.com/soccer/team/results/_/id/179/cape-verde",
-  "Japan":        "https://www.espn.com/soccer/team/results/_/id/306/japan",
-  "South Korea":  "https://www.espn.com/soccer/team/results/_/id/331/south-korea",
-  "Iran":         "https://www.espn.com/soccer/team/results/_/id/304/iran",
-  "Saudi Arabia": "https://www.espn.com/soccer/team/results/_/id/326/saudi-arabia",
-  "Australia":    "https://www.espn.com/soccer/team/results/_/id/297/australia",
-  "Uzbekistan":   "https://www.espn.com/soccer/team/results/_/id/338/uzbekistan",
-  "Qatar":        "https://www.espn.com/soccer/team/results/_/id/324/qatar",
-  "Jordan":       "https://www.espn.com/soccer/team/results/_/id/310/jordan",
-  "Iraq":         "https://www.espn.com/soccer/team/results/_/id/303/iraq",
-  "USA":          "https://www.espn.com/soccer/team/results/_/id/564/united-states",
-  "Mexico":       "https://www.espn.com/soccer/team/results/_/id/58/mexico",
-  "Canada":       "https://www.espn.com/soccer/team/results/_/id/96/canada",
-  "Panama":       "https://www.espn.com/soccer/team/results/_/id/115/panama",
-  "Haiti":        "https://www.espn.com/soccer/team/results/_/id/104/haiti",
-  "Curaçao":      "https://www.espn.com/soccer/team/results/_/id/6655/curacao",
-  "New Zealand":  "https://www.espn.com/soccer/team/results/_/id/317/new-zealand",
+// ── TEAM & QUALIFYING LINKS ───────────────────────────────────────────────────
+// FIFA national team pages — authoritative, uses official 3-letter codes
+const FIFA_TEAM_URLS = {
+  "France":"FRA","England":"ENG","Spain":"ESP","Germany":"GER","Portugal":"POR",
+  "Netherlands":"NED","Belgium":"BEL","Croatia":"CRO","Austria":"AUT","Switzerland":"SUI",
+  "Norway":"NOR","Türkiye":"TUR","Sweden":"SWE","Scotland":"SCO",
+  "Bosnia and Herzegovina":"BIH","Czechia":"CZE",
+  "Argentina":"ARG","Brazil":"BRA","Uruguay":"URU","Colombia":"COL",
+  "Ecuador":"ECU","Paraguay":"PAR",
+  "Morocco":"MAR","Senegal":"SEN","Egypt":"EGY","Ivory Coast":"CIV","Tunisia":"TUN",
+  "South Africa":"RSA","Algeria":"ALG","Ghana":"GHA","DR Congo":"COD","Cape Verde":"CPV",
+  "Japan":"JPN","South Korea":"KOR","Iran":"IRN","Saudi Arabia":"KSA","Australia":"AUS",
+  "Uzbekistan":"UZB","Qatar":"QAT","Jordan":"JOR","Iraq":"IRQ",
+  "USA":"USA","Mexico":"MEX","Canada":"CAN","Panama":"PAN","Haiti":"HAI",
+  "Curaçao":"CUW","New Zealand":"NZL",
 };
+function fifaTeamUrl(name){
+  const code=FIFA_TEAM_URLS[name];
+  return code?`https://www.fifa.com/en/associations/association/${code}/national-team/men`:null;
+}
 
-// FIFA qualifying pages per confederation
+// Wikipedia qualifying pages — stable, complete, confederation-level
 const QUAL_URLS = {
-  "UEFA":     "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/uefa",
-  "CONMEBOL": "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/conmebol",
-  "CAF":      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/caf",
-  "AFC":      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/afc",
-  "CONCACAF": "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/concacaf",
-  "OFC":      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/qualification/ofc",
+  "UEFA":     "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(UEFA)",
+  "CONMEBOL": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(CONMEBOL)",
+  "CAF":      "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(CAF)",
+  "AFC":      "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(AFC)",
+  "CONCACAF": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(CONCACAF)",
+  "OFC":      "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_qualification_(OFC)",
 };
 
 
@@ -1175,7 +1143,7 @@ function EloModal({team,onClose}){
   const [hovered,setHovered]=useState(null);
   if(!bd)return null;
 
-  const espnUrl = ESPN_URLS[team.name];
+  const espnUrl = fifaTeamUrl(team.name);
   const qualUrl = QUAL_URLS[team.conf];
 
   const rows=[
@@ -1228,12 +1196,12 @@ function EloModal({team,onClose}){
               {r.key==="form"&&hovered==="form"&&(
                 <div style={{paddingBottom:14}}>
                   <div style={{...B,fontSize:12,color:T.muted,lineHeight:1.6,marginBottom:10}}>
-                    Live match results are available on ESPN — the link below opens {team.name}'s full results page directly.
+                    FIFA.com has {team.name}'s full match history including recent results and fixtures.
                   </div>
                   {espnUrl?(
                     <a href={espnUrl} target="_blank" rel="noopener noreferrer"
-                      style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 16px",borderRadius:8,background:"#CC0C00",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
-                      <span>📊</span> View {team.name} results on ESPN →
+                      style={{display:"inline-flex",alignItems:"center",gap:8,padding:"9px 16px",borderRadius:8,background:"#026cb6",color:"#fff",textDecoration:"none",...B,fontSize:13,fontWeight:600}}>
+                      <span>📊</span> View {team.name} on FIFA.com →
                     </a>
                   ):(
                     <div style={{...B,fontSize:12,color:T.faint}}>ESPN link not available for this team.</div>
