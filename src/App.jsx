@@ -223,37 +223,53 @@ const VENUES = [
 ];
 
 // ── SIMULATION ────────────────────────────────────────────────────────────────
-function poisson(λ){const L=Math.exp(-λ);let p=1,k=0;do{k++;p*=Math.random();}while(p>L);return k-1;}
-function eloWin(a,b){return 1/(1+Math.pow(10,-(a.elo-b.elo)/400));}
-function simGroup(group){
+// ── SEEDED PRNG (Mulberry32) — consistent results across page loads ────────────
+function mulberry32(seed){
+  return function(){
+    seed|=0;seed=seed+0x6D2B79F5|0;
+    let t=Math.imul(seed^seed>>>15,1|seed);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return((t^t>>>14)>>>0)/4294967296;
+  };
+}
+// Fixed seed so Overview always shows the same favourites
+const SEEDED_RNG = mulberry32(20260611);
+
+function poisson(λ,rng=Math.random){const L=Math.exp(-λ);let p=1,k=0;do{k++;p*=rng();}while(p>L);return k-1;}
+function eloWin(a,b,adj={}){
+  const aElo=(a.elo+(adj[a.name]||0));
+  const bElo=(b.elo+(adj[b.name]||0));
+  return 1/(1+Math.pow(10,-(aElo-bElo)/400));
+}
+function simGroup(group,rng,adj){
   const st=group.map(t=>({team:t,pts:0,gf:0,ga:0,gd:0}));
   for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
-    const p1=eloWin(group[i],group[j]);
-    const eq=Math.max(0,1-Math.abs(group[i].elo-group[j].elo)/900);
-    const pD=0.10+0.20*eq,pW=(1-pD)*p1,r=Math.random();
-    const g1=poisson(2.5*p1),g2=poisson(2.5*(1-p1));
+    const p1=eloWin(group[i],group[j],adj);
+    const eq=Math.max(0,1-Math.abs((group[i].elo+(adj[group[i].name]||0))-(group[j].elo+(adj[group[j].name]||0)))/900);
+    const pD=0.10+0.20*eq,pW=(1-pD)*p1,r=rng();
+    const g1=poisson(2.5*p1,rng),g2=poisson(2.5*(1-p1),rng);
     if(r<pW){st[i].gf+=Math.max(g1,g2+1);st[i].ga+=g2;st[j].gf+=g2;st[j].ga+=Math.max(g1,g2+1);st[i].pts+=3;}
     else if(r<pW+pD){const g=Math.round((g1+g2)/2);st[i].gf+=g;st[i].ga+=g;st[j].gf+=g;st[j].ga+=g;st[i].pts+=1;st[j].pts+=1;}
     else{st[i].gf+=g1;st[i].ga+=Math.max(g2,g1+1);st[j].gf+=Math.max(g2,g1+1);st[j].ga+=g1;st[j].pts+=3;}
   }
-  return st.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||Math.random()-0.5);
+  return st.sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||rng()-0.5);
 }
-function simKO(a,b){const p=0.5+(eloWin(a,b)-0.5)*0.72;return Math.random()<p?a:b;}
-function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function runSim(stats){
-  const sorted=[...TEAMS].sort((a,b)=>b.elo-a.elo);
-  const pots=[shuffle(sorted.slice(0,12)),shuffle(sorted.slice(12,24)),shuffle(sorted.slice(24,36)),shuffle(sorted.slice(36,48))];
+function simKO(a,b,rng,adj){const p=0.5+(eloWin(a,b,adj)-0.5)*0.72;return rng()<p?a:b;}
+function shuffleR(arr,rng){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function runSim(stats,rng=Math.random,adj={}){
+  const sorted=[...TEAMS].sort((a,b)=>(b.elo+(adj[b.name]||0))-(a.elo+(adj[a.name]||0)));
+  const pots=[shuffleR(sorted.slice(0,12),rng),shuffleR(sorted.slice(12,24),rng),shuffleR(sorted.slice(24,36),rng),shuffleR(sorted.slice(36,48),rng)];
   const groups=Array.from({length:12},(_,i)=>[pots[0][i],pots[1][i],pots[2][i],pots[3][i]]);
-  const gRes=groups.map(simGroup);
+  const gRes=groups.map(g=>simGroup(g,rng,adj));
   const q=gRes.flatMap(g=>[g[0].team,g[1].team]);
   const thirds=gRes.map(g=>g[2]).sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf);
-  let round=shuffle([...q,...thirds.slice(0,8).map(t=>t.team)]);
+  let round=shuffleR([...q,...thirds.slice(0,8).map(t=>t.team)],rng);
   round.forEach(t=>stats[t.name].r32++);
-  function runRound(r){const n=[];for(let i=0;i<r.length;i+=2){const w=simKO(r[i],r[i+1]);const key=["r16","qf","sf","f"][Math.log2(r.length)-2];stats[w.name][key]++;n.push(w);}return n;}
+  function runRound(r){const n=[];for(let i=0;i<r.length;i+=2){const w=simKO(r[i],r[i+1],rng,adj);const key=["r16","qf","sf","f"][Math.log2(r.length)-2];stats[w.name][key]++;n.push(w);}return n;}
   round=runRound(round);round=runRound(round);round=runRound(round);
   const[f1,f2]=[round[0],round[1]];
   stats[f1.name].fn++;stats[f2.name].fn++;
-  const w=simKO(f1,f2);stats[w.name].w++;
+  const w=simKO(f1,f2,rng,adj);stats[w.name].w++;
 }
 function mkStats(){const s={};TEAMS.forEach(t=>{s[t.name]={w:0,fn:0,sf:0,qf:0,r16:0,r32:0};});return s;}
 
@@ -404,7 +420,8 @@ function HomeSection({setTab}){
   const [venueModal,setVenueModal]=useState(null);
   useEffect(()=>{
     const stats=mkStats();let done=0;
-    function batch(){const end=Math.min(done+600,5000);while(done<end){runSim(stats);done++;}
+    const rng=mulberry32(20260611);
+    function batch(){const end=Math.min(done+600,5000);while(done<end){runSim(stats,rng,{});done++;}
       if(done<5000)setTimeout(batch,10);
       else{const r=TEAMS.map(t=>({...t,...stats[t.name],winPct:stats[t.name].w/50,finalPct:stats[t.name].fn/50})).sort((a,b)=>b.w-a.w);setResults(r);}
     }
@@ -622,40 +639,117 @@ const N=25000;
 function SimulatorSection(){
   const [progress,setProgress]=useState(0);
   const [results,setResults]=useState(null);
+  const [running,setRunning]=useState(false);
   const [conf,setConf]=useState("ALL");
-  const statsRef=useRef(mkStats());
-  const ran=useRef(false);
+  const [adjustments,setAdjustments]=useState({});
+  const [simCount,setSimCount]=useState(25000);
+  const [showAdj,setShowAdj]=useState(false);
+  const [adjSearch,setAdjSearch]=useState("");
+  const abortRef=useRef(false);
 
-  useEffect(()=>{
-    if(ran.current)return;ran.current=true;
-    const stats=statsRef.current;let done=0;
-    function batch(){const end=Math.min(done+500,N);while(done<end){runSim(stats);done++;}
+  function startSim(adj,n){
+    setResults(null);setProgress(0);setRunning(true);abortRef.current=false;
+    const stats=mkStats();let done=0;
+    function batch(){
+      if(abortRef.current)return;
+      const end=Math.min(done+500,n);
+      while(done<end){runSim(stats,Math.random,adj);done++;}
       setProgress(done);
-      if(done<N)setTimeout(batch,8);
+      if(done<n)setTimeout(batch,8);
       else{
-        const r=TEAMS.map(t=>({...t,...stats[t.name],winPct:stats[t.name].w/N*100,finalPct:stats[t.name].fn/N*100,sfPct:stats[t.name].sf/N*100,qfPct:stats[t.name].qf/N*100,r16Pct:stats[t.name].r16/N*100})).sort((a,b)=>b.w-a.w);
-        setResults(r);
+        const r=TEAMS.map(t=>({...t,...stats[t.name],winPct:stats[t.name].w/n*100,finalPct:stats[t.name].fn/n*100,sfPct:stats[t.name].sf/n*100,qfPct:stats[t.name].qf/n*100,r16Pct:stats[t.name].r16/n*100})).sort((a,b)=>b.w-a.w);
+        setResults(r);setRunning(false);
       }
     }
     setTimeout(batch,60);
-  },[]);
+  }
 
-  const pct=Math.round(progress/N*100);
+  useEffect(()=>{startSim({},simCount);},[]);
+
+  function rerun(){startSim(adjustments,simCount);}
+  function resetAdj(){setAdjustments({});startSim({},simCount);}
+  function setAdj(name,val){setAdjustments(prev=>({...prev,[name]:Number(val)}));}
+  function hasAdj(){return Object.values(adjustments).some(v=>v!==0);}
+
+  const pct=Math.round(progress/(running?simCount:1)*100);
   const filtered=results?(conf==="ALL"?results:results.filter(t=>t.conf===conf)):[];
   const maxWin=results?results[0].winPct:1;
+  const adjTeams=TEAMS.filter(t=>t.name.toLowerCase().includes(adjSearch.toLowerCase()));
 
   return(
     <Page>
-      <div style={{marginBottom:24}}>
+      <div style={{marginBottom:20}}>
         <h2 style={{...H,fontSize:28,fontWeight:800,color:T.ink,letterSpacing:-.5,marginBottom:8}}>
           <Tooltip text="A Monte Carlo simulation runs the entire tournament thousands of times using probability-based match outcomes. Each run has a random element — the percentages shown reflect how often each team won across all simulated tournaments.">Monte Carlo</Tooltip> Simulator
         </h2>
         <p style={{...B,fontSize:13,color:T.muted}}>
-          {N.toLocaleString()} full tournaments simulated using{" "}
+          Simulated using{" "}
           <Tooltip text="Elo ratings measure team strength on a numerical scale, updated after every match. The difference between two teams' Elo scores determines the win probability assigned before each simulated match.">Elo ratings</Tooltip>
-          {" "}and a Poisson goal model. Results are statistical estimates, not predictions.
+          {" "}and a Poisson goal model. Adjust team strength below and re-run to model injuries, form, or hypothetical scenarios.
         </p>
       </div>
+
+      {/* Controls bar */}
+      <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap",marginBottom:20,padding:"14px 16px",background:T.surface,border:`1px solid ${T.border}`,borderRadius:10}}>
+        <div style={{...B,fontSize:12,fontWeight:600,color:T.muted,marginRight:4}}>Scenarios:</div>
+        {[5000,10000,25000].map(n=>(
+          <OutlineBtn key={n} active={simCount===n} onClick={()=>setSimCount(n)}>{n.toLocaleString()}</OutlineBtn>
+        ))}
+        <div style={{flex:1}} />
+        <OutlineBtn active={showAdj} onClick={()=>setShowAdj(!showAdj)}>
+          {showAdj?"Hide":"⚙ Adjust"} team strength {hasAdj()?`(${Object.values(adjustments).filter(v=>v!==0).length} modified)`:""}
+        </OutlineBtn>
+        {hasAdj()&&<OutlineBtn onClick={resetAdj}>Reset all</OutlineBtn>}
+        <button onClick={rerun} disabled={running} style={{...H,fontWeight:700,fontSize:13,padding:"6px 18px",borderRadius:7,border:"none",background:running?T.border:T.red,color:running?T.faint:"#fff",cursor:running?"not-allowed":"pointer",transition:"all .15s"}}>
+          {running?"Running…":"▶ Re-run"}
+        </button>
+      </div>
+
+      {/* Adjustments panel */}
+      {showAdj&&(
+        <Card style={{marginBottom:20,padding:"18px 20px"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <div style={{...H,fontSize:15,fontWeight:700,color:T.ink}}>Team strength adjustments</div>
+            <div style={{...B,fontSize:11,color:T.faint}}>Drag slider or type a value. Positive = stronger, negative = weaker.</div>
+          </div>
+          <div style={{...B,fontSize:11,color:T.faint,marginBottom:14}}>Use this to model injuries to key players, current form, or hypothetical scenarios. Changes apply when you click Re-run.</div>
+          <input value={adjSearch} onChange={e=>setAdjSearch(e.target.value)} placeholder="Search teams…"
+            style={{...B,padding:"7px 12px",borderRadius:6,border:`1px solid ${T.border}`,background:T.bg,color:T.ink,fontSize:13,width:"100%",outline:"none",marginBottom:14}} />
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10,maxHeight:320,overflowY:"auto"}}>
+            {adjTeams.map(t=>{
+              const val=adjustments[t.name]||0;
+              const adjElo=t.elo+val;
+              return(
+                <div key={t.name} style={{background:val!==0?T.redLight:T.bg,borderRadius:8,padding:"10px 12px",border:`1px solid ${val!==0?T.redMid:T.border}`}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+                    <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                      <span style={{fontSize:18}}>{t.flag}</span>
+                      <span style={{...B,fontSize:13,fontWeight:600,color:T.ink}}>{t.name}</span>
+                    </div>
+                    <div style={{...B,fontSize:11,color:val>0?T.red:val<0?"#2563EB":T.faint}}>
+                      Elo {adjElo}{val!==0&&<span style={{marginLeft:4}}>({val>0?"+":""}{val})</span>}
+                    </div>
+                  </div>
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                    <input type="range" min="-200" max="200" step="10" value={val}
+                      onChange={e=>setAdj(t.name,e.target.value)}
+                      style={{flex:1,accentColor:T.red}} />
+                    <input type="number" min="-200" max="200" step="10" value={val}
+                      onChange={e=>setAdj(t.name,e.target.value)}
+                      style={{...B,width:56,padding:"3px 6px",borderRadius:5,border:`1px solid ${T.border}`,background:T.surface,color:T.ink,fontSize:12,textAlign:"center",outline:"none"}} />
+                    {val!==0&&<button onClick={()=>setAdj(t.name,0)} style={{...B,fontSize:11,padding:"3px 8px",borderRadius:5,border:`1px solid ${T.border}`,background:T.surface,color:T.muted,cursor:"pointer"}}>✕</button>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {hasAdj()&&(
+            <div style={{marginTop:14,padding:"10px 14px",background:T.redLight,borderRadius:8,border:`1px solid ${T.redMid}`,...B,fontSize:12,color:T.red}}>
+              {Object.entries(adjustments).filter(([,v])=>v!==0).map(([name,v])=>`${name} ${v>0?"+":""}${v}`).join(" · ")} — click Re-run to apply
+            </div>
+          )}
+        </Card>
+      )}
 
       {!results?(
         <Card style={{textAlign:"center",padding:"60px 32px"}}>
